@@ -10,19 +10,19 @@
   --wall: #3B4A5A; --floor: #FFFFFF; --floorgrid: #E3E8EC;
   --planned: #1F8A84; --actual: #D9621F; --actual-soft: rgba(217,98,31,.28); --sensor: #1F8A84;
   --good: #2E8B57; --bad: #C8372D; --chip: #EEF2F4; --accent-soft: #FCE7DB; --code-bg: #16202B; --code-fg: #E6EDF3;
-  --s1: #0E9384; --s2: #6B5BD2; --s3: #D9621F;
+  --s1: #0E9384; --s2: #6B5BD2; --s3: #D9621F; --goal: #B98200;
   --f-display: "Bitter", Georgia, serif; --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #121A22; --panel: #1A2430; --ink: #E6ECF1; --muted: #9AA8B5; --line: #2E3B49;
   --wall: #0B1117; --floor: #223040; --floorgrid: #2C3B4C;
   --planned: #3BB5AC; --actual: #F08A48; --actual-soft: rgba(240,138,72,.3); --sensor: #3BB5AC;
-  --good: #4CBF7E; --bad: #EF6A5E; --chip: #243140; --accent-soft: #3A2A20; --code-bg: #0E151C; --code-fg: #E6EDF3; --s1: #18A092; --s2: #8272E8; --s3: #DC6A30; color-scheme: dark; } }
+  --good: #4CBF7E; --bad: #EF6A5E; --chip: #243140; --accent-soft: #3A2A20; --code-bg: #0E151C; --code-fg: #E6EDF3; --s1: #18A092; --s2: #8272E8; --s3: #DC6A30; --goal: #E3B341; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #121A22; --panel: #1A2430; --ink: #E6ECF1; --muted: #9AA8B5; --line: #2E3B49;
   --wall: #0B1117; --floor: #223040; --floorgrid: #2C3B4C;
   --planned: #3BB5AC; --actual: #F08A48; --actual-soft: rgba(240,138,72,.3); --sensor: #3BB5AC;
-  --good: #4CBF7E; --bad: #EF6A5E; --chip: #243140; --accent-soft: #3A2A20; --code-bg: #0E151C; --code-fg: #E6EDF3; --s1: #18A092; --s2: #8272E8; --s3: #DC6A30; color-scheme: dark; }
+  --good: #4CBF7E; --bad: #EF6A5E; --chip: #243140; --accent-soft: #3A2A20; --code-bg: #0E151C; --code-fg: #E6EDF3; --s1: #18A092; --s2: #8272E8; --s3: #DC6A30; --goal: #E3B341; color-scheme: dark; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; padding: 20px 16px 32px; }
@@ -112,6 +112,9 @@ canvas.chart { height: clamp(160px, 26vh, 250px); touch-action: auto; }
 .clegend b { color: var(--ink); font-weight: 600; margin-right: 4px; }
 .clegend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 5px; }
 .clegend i.dash { border-top-style: dashed; }
+.clegend i.dot { border-top-style: dotted; border-top-width: 3px; }
+.gdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--goal); box-shadow: inset 0 0 0 2px var(--panel), 0 0 0 1.5px var(--goal); margin-right: 6px; vertical-align: -1px; }
+tr.goalrow td:first-child { white-space: nowrap; }
 /* React triggers */
 .subhead { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 4px 0 0; }
 .defrow { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: 14px; }
@@ -172,12 +175,13 @@ table.ggrid th { white-space: normal; vertical-align: bottom; }
         </div>
         <div class="controls" id="playRow" hidden>
           <label class="hint" for="layout">Layout</label>
-          <select id="layout"><option value="">Choose…</option><option value="one">One object</option><option value="two">Two objects</option><option value="corner">Object near a corner (wraps)</option><option value="random">Random objects</option><option value="clear">No objects</option></select>
+          <select id="layout"><option value="">Choose…</option><option value="one">One object</option><option value="two">Two objects</option><option value="corner">Object near a corner (wraps)</option><option value="goalBehind">Goal behind an object</option><option value="random">Random objects</option><option value="clear">No objects</option></select>
+          <label class="sw-inline"><input type="checkbox" id="goalOn"> Goal marker</label>
           <label class="sw-inline"><input type="checkbox" id="second"> Second vehicle</label>
           <label class="sw-inline"><input type="checkbox" id="showCones" checked> Show sensor cones</label>
           <select id="secondPreset" aria-label="Second vehicle behavior" hidden></select>
         </div>
-        <p class="hint" id="playHelp" hidden>Click empty floor to add an object (up to 5). Drag an object or a vehicle to move it; drag the small handle in front of a vehicle to aim it. Double-click an object to remove it. With two vehicles, each one senses the other as an object.</p>
+        <p class="hint" id="playHelp" hidden>Click empty floor to add an object (up to 5). Drag an object or a vehicle to move it; drag the small handle in front of a vehicle to aim it. Double-click an object to remove it. Turn on the goal marker and drag it anywhere; the robot sees it with its own goal sensors, and objects do not block them. With two vehicles, each one senses the other as an object.</p>
         <span class="pill" id="pill" aria-live="polite">Ready: press Run</span>
         <div class="stats">
           <div class="stat"><small id="lDist">Distance from goal</small><b id="sDist">–</b></div>
@@ -390,13 +394,19 @@ const MR = (() => {
     return tr.cond === 'gt' ? d > tr.th : d < tr.th;
   }
   // Braitenberg grid: wheel = base + sum(gain * signal); signal = setpoint - reading (bump: 1 if pressed)
-  function signals(S, grid) {
-    return SENS.map((k, i) => S.bump ? (S.contact[i] ? 1 : 0) : grid.rows[k].sp - S[k]);
+  // goal sensors (GL, GF, GR) exist only in the playground when a goal marker is placed
+  const GSENS = ['GL', 'GF', 'GR'];
+  const gridKeys = (S, grid) => SENS.concat(GSENS.filter(k => grid.rows[k] && S && S[k] !== undefined));
+  function signals(S, grid) {           // {key: signal}
+    const out = {};
+    SENS.forEach((k, i) => { out[k] = S.bump ? (S.contact[i] ? 1 : 0) : grid.rows[k].sp - S[k]; });
+    GSENS.forEach(k => { if (grid.rows[k] && S[k] !== undefined) out[k] = grid.rows[k].sp - S[k]; });
+    return out;
   }
   function gridWheels(S, grid) {
     const sig = signals(S, grid);
     let vl = grid.base, vr = grid.base;
-    SENS.forEach((k, i) => { vl += grid.rows[k].gL * sig[i]; vr += grid.rows[k].gR * sig[i]; });
+    Object.keys(sig).forEach(k => { vl += grid.rows[k].gL * sig[k]; vr += grid.rows[k].gR * sig[k]; });
     return { vl, vr, sig };
   }
   function makeController(cfg) {
@@ -525,7 +535,28 @@ const MR = (() => {
   const wrapP = (v, L) => ((v % L) + L) % L;
   const angDiff = a => Math.atan2(Math.sin(a), Math.cos(a));
   // objects: [{x, y, r, id}]  (round objects, and other vehicles)
-  function sensePlay(x, y, th, s, objs) {
+  const GOAL_R = 0.08;
+  // cone reading for one target: distance from robot edge to target edge, reading farther near the cone edge
+  function coneRead(o, a) {
+    const ad = Math.abs(angDiff(o.b - a)); if (ad > CONE) return PRANGE;
+    const g = Math.max(0, o.d - o.r - RAD);
+    const w = Math.min(1, Math.max(0, (ad - 0.5 * CONE) / (0.5 * CONE)));
+    return g + (PRANGE - g) * w * w * (3 - 2 * w);
+  }
+  function sensePlay(x, y, th, s, objs, goal) {
+    const S = sensePlayObj(x, y, th, s, objs);
+    if (goal) {                          // goal sensors: see only the goal marker, same directions and cones
+      const ang = s.angle * Math.PI / 180, dirs = [th + ang, th, th - ang];
+      const dx = wrapD(goal.x - x, PW), dy = wrapD(goal.y - y, PH), o = { d: Math.hypot(dx, dy), b: Math.atan2(dy, dx), r: GOAL_R };
+      GSENS.forEach((k, i) => {
+        let v = o.d < o.r + RAD ? 0 : coneRead(o, dirs[i]);     // on top of the marker: every goal sensor reads 0
+        if (s.noise && v < PRANGE) v = Math.max(0, Math.min(PRANGE, v + gauss() * (s.noiseAmt || 0.006) * (1 + 5 * v)));
+        S[k] = v;
+      });
+    }
+    return S;
+  }
+  function sensePlayObj(x, y, th, s, objs) {
     const ang = s.angle * Math.PI / 180, dirs = [th + ang, th, th - ang];
     const rel = objs.map(o => { const dx = wrapD(o.x - x, PW), dy = wrapD(o.y - y, PH); return { d: Math.hypot(dx, dy), b: Math.atan2(dy, dx), r: o.r, id: o.id }; });
     if (s.type === 'bump') {
@@ -551,12 +582,12 @@ const MR = (() => {
   function makeVehicle(x, y, th, cfg) {
     return { x, y, th, vl: 0, vr: 0, eL: 1, eR: 1, nextSlip: 0, t: 0, cfg, ctl: cfg.mode === 'open' ? null : makeController(cfg),
       prog: cfg.program ? (() => { const st = []; let a = 0; cfg.program.forEach(([, , d]) => { a += Math.max(0, d || 0); st.push(a); }); return st; })() : [],
-      hits: 0, inContact: false, near: 0, visited: new Set(), S: null, info: null, step: 0, done: false };
+      hits: 0, inContact: false, near: 0, atGoal: 0, firstGoal: null, visited: new Set(), S: null, info: null, step: 0, done: false };
   }
-  function stepPlay(v, lamps, others) {
+  function stepPlay(v, lamps, others, goal) {
     const cfg = v.cfg, o = cfg.problems || {};
     const objs = lamps.map((l, i) => ({ x: l.x, y: l.y, r: LAMP_R, id: 'lamp' + i })).concat(others.map((w, j) => ({ x: w.x, y: w.y, r: RAD, id: 'veh' + j })));
-    v.S = sensePlay(v.x, v.y, v.th, cfg.sensor, objs);
+    v.S = sensePlay(v.x, v.y, v.th, cfg.sensor, objs, goal);
     let cl = 0, cr = 0;
     if (v.ctl) { const u = v.ctl.step(v.S, DT); cl = u.vl; cr = u.vr; v.info = u.info; }
     else {
@@ -579,22 +610,33 @@ const MR = (() => {
     let nearNow = false;
     lamps.forEach((l, i) => { if (Math.hypot(wrapD(l.x - v.x, PW), wrapD(l.y - v.y, PH)) - LAMP_R - RAD < 0.30) { nearNow = true; v.visited.add(l.id); } });
     if (nearNow) v.near += DT;
+    if (goal) {
+      const gd = Math.hypot(wrapD(goal.x - v.x, PW), wrapD(goal.y - v.y, PH));
+      if (gd < GOAL_R + RAD + 0.10) { v.atGoal += DT; if (v.firstGoal == null) v.firstGoal = v.t; }
+    }
     v.blocked = blocked;
   }
   const PLAY_LAYOUTS = {
     one: { name: 'One object', lamps: [[2.6, 1.0]], start: [1.0, 0.6, 0.35] },
     two: { name: 'Two objects', lamps: [[1.6, 1.25], [2.7, 0.7]], start: [0.5, 0.5, 0.3] },
     corner: { name: 'Object near a corner (wraps)', lamps: [[3.85, 1.85]], start: [0.9, 0.7, 2.8] },
+    goalBehind: { name: 'Goal behind an object', lamps: [[1.9, 1.0]], start: [0.9, 1.0, 0], goal: [2.9, 1.0] },
   };
   const prow = (sp, gL, gR) => ({ sp, gL, gR });
+  const G0 = () => ({ GL: prow(1.5, 0, 0), GF: prow(1.5, 0, 0), GR: prow(1.5, 0, 0) });
+  const withGoal = (rows, g) => Object.assign(rows, G0(), g || {});
   const PLAY_GRID_PRESETS = {
-    fear:       { name: 'Fear (same side, +)',     base: 0.10, rows: { L: prow(1.5, 0.12, 0), F: prow(1.5, 0, 0), R: prow(1.5, 0, 0.12) } },
-    aggression: { name: 'Aggression (crossed, +)', base: 0.06, rows: { L: prow(1.5, 0, 0.12), F: prow(1.5, 0.06, 0.06), R: prow(1.5, 0.12, 0) } },
-    love:       { name: 'Love (same side, −)',     base: 0.22, rows: { L: prow(1.5, -0.10, 0), F: prow(1.5, -0.16, -0.16), R: prow(1.5, 0, -0.10) } },
-    explorer:   { name: 'Explorer (crossed, −)',   base: 0.22, rows: { L: prow(1.5, 0, -0.10), F: prow(1.5, -0.06, -0.06), R: prow(1.5, -0.10, 0) } },
+    fear:       { name: 'Fear (same side, +)',     base: 0.10, rows: withGoal({ L: prow(1.5, 0.12, 0), F: prow(1.5, 0, 0), R: prow(1.5, 0, 0.12) }) },
+    aggression: { name: 'Aggression (crossed, +)', base: 0.06, rows: withGoal({ L: prow(1.5, 0, 0.12), F: prow(1.5, 0.06, 0.06), R: prow(1.5, 0.12, 0) }) },
+    love:       { name: 'Love (same side, −)',     base: 0.22, rows: withGoal({ L: prow(1.5, -0.10, 0), F: prow(1.5, -0.16, -0.16), R: prow(1.5, 0, -0.10) }) },
+    explorer:   { name: 'Explorer (crossed, −)',   base: 0.22, rows: withGoal({ L: prow(1.5, 0, -0.10), F: prow(1.5, -0.06, -0.06), R: prow(1.5, -0.10, 0) }) },
+    goalLove:   { name: 'Goal: love it, fear objects', base: 0.22, rows: withGoal({ L: prow(1.5, 0.15, 0), F: prow(1.5, 0.10, -0.05), R: prow(1.5, 0, 0.15) },
+                  { GL: prow(1.5, -0.10, 0), GF: prow(1.5, -0.15, -0.15), GR: prow(1.5, 0, -0.10) }) },
+    goalAggr:   { name: 'Goal: attack it, fear objects', base: 0.08, rows: withGoal({ L: prow(1.5, 0.15, 0), F: prow(1.5, 0.10, -0.05), R: prow(1.5, 0, 0.15) },
+                  { GL: prow(1.5, 0, 0.12), GF: prow(1.5, 0.06, 0.06), GR: prow(1.5, 0.12, 0) }) },
   };
 
-  return { PW, PH, PRANGE, LAMP_R, CONE, wrapD, wrapP, sensePlay, makeVehicle, stepPlay, PLAY_LAYOUTS, PLAY_GRID_PRESETS, SENS, signals, gridWheels, fires, REACT_PRESETS, GRID_PRESETS, HYBRID_PRESETS, sideTarget, openAt, passDist, CELL, COLS, ROWS, TRACK, RAD, RANGE, VMAX, DT, CLASSIC, makeMaze, randomMaze, center, wallAt, sense, simulate };
+  return { GSENS, GOAL_R, gridKeys, PW, PH, PRANGE, LAMP_R, CONE, wrapD, wrapP, sensePlay, makeVehicle, stepPlay, PLAY_LAYOUTS, PLAY_GRID_PRESETS, SENS, signals, gridWheels, fires, REACT_PRESETS, GRID_PRESETS, HYBRID_PRESETS, sideTarget, openAt, passDist, CELL, COLS, ROWS, TRACK, RAD, RANGE, VMAX, DT, CLASSIC, makeMaze, randomMaze, center, wallAt, sense, simulate };
 })();
 
 
@@ -638,13 +680,19 @@ const MR = (() => {
     hreact: clone(H0.react), hgrid: clone(MR.GRID_PRESETS[H0.grid]),
     pgrid: clone(MR.PLAY_GRID_PRESETS.love), phreact: clone(PH0.react), phgrid: clone(MR.PLAY_GRID_PRESETS[PH0.grid]),
     play: { lamps: L0.lamps.map(([x, y], i) => ({ x, y, id: i })), start: { x: L0.start[0], y: L0.start[1], th: L0.start[2] },
-      second: { on: false, preset: 'aggression', x: 3.2, y: 1.6, th: 3.5 } },
+      second: { on: false, preset: 'aggression', x: 3.2, y: 1.6, th: 3.5 }, goal: { on: false, x: 3.3, y: 1.4 } },
   };
   let st = clone(S0);
   try { const s = JSON.parse(localStorage.getItem('mazeRunner4') || 'null'); if (s && s.v === 4) st = Object.assign(clone(S0), s.st); } catch (e) {}
+  // older saves: make sure the goal marker and the goal rows of the playground grids exist
+  if (!st.play.goal) st.play.goal = clone(S0.play.goal);
+  [st.pgrid, st.phgrid].forEach(G => MR.GSENS.forEach(k => { if (!G.rows[k]) G.rows[k] = { sp: MR.PRANGE, gL: 0, gR: 0 }; }));
   const save = () => { try { localStorage.setItem('mazeRunner4', JSON.stringify({ v: 4, st })); } catch (e) {} };
   const sen = () => st.sensors[st.world];
   const isPlay = () => st.world === 'play';
+  const goalObj = () => isPlay() && st.play.goal.on ? st.play.goal : null;
+  const GNAME = { GL: 'Goal left', GF: 'Goal front', GR: 'Goal right' };
+  const goalRows = G => !!goalObj() && MR.GSENS.every(k => G.rows[k]);
   const gridPresets = () => isPlay() ? MR.PLAY_GRID_PRESETS : MR.GRID_PRESETS;
   const hybridPresets = () => isPlay() ? PLAY_HYBRID : MR.HYBRID_PRESETS;
   const rangeNow = () => isPlay() ? MR.PRANGE : RANGE;
@@ -760,12 +808,16 @@ const MR = (() => {
         <td><input id="gsp${k}" type="number" step="0.005" min="0" max="${rangeNow()}" value="${G.rows[k].sp}" ${bump ? 'disabled' : ''} aria-label="${SNAME[k]} setpoint"><span class="contrib">${bump ? '1 if pressed' : ''}</span></td>
         <td><input id="ggL${k}" type="number" step="0.05" value="${G.rows[k].gL}" aria-label="${SNAME[k]} gain to left motor"><span class="contrib" id="cL${k}"></span></td>
         <td><input id="ggR${k}" type="number" step="0.05" value="${G.rows[k].gR}" aria-label="${SNAME[k]} gain to right motor"><span class="contrib" id="cR${k}"></span></td></tr>`).join('')}
+      ${goalRows(G) ? MR.GSENS.map(k => `<tr class="goalrow"><td><span class="gdot"></span>${GNAME[k]}</td>
+        <td><input id="gsp${k}" type="number" step="0.005" min="0" max="${MR.PRANGE}" value="${G.rows[k].sp}" aria-label="${GNAME[k]} setpoint"><span class="contrib"></span></td>
+        <td><input id="ggL${k}" type="number" step="0.05" value="${G.rows[k].gL}" aria-label="${GNAME[k]} gain to left motor"><span class="contrib" id="cL${k}"></span></td>
+        <td><input id="ggR${k}" type="number" step="0.05" value="${G.rows[k].gR}" aria-label="${GNAME[k]} gain to right motor"><span class="contrib" id="cR${k}"></span></td></tr>`).join('') : ''}
       <tr class="total"><td>Wheel speed</td><td></td><td><span class="contrib" id="tL">–</span></td><td><span class="contrib" id="tR">–</span></td></tr>
       </tbody></table>`;
     box.appendChild(wrap);
     const signCls = inp => { const v = parseFloat(inp.value); inp.classList.toggle('pos', v > 0); inp.classList.toggle('neg', v < 0); };
     wrap.querySelector('#gBase').addEventListener('input', e => { G.base = parseFloat(e.target.value) || 0; changed(true); });
-    SENS.forEach(k => {
+    SENS.concat(goalRows(G) ? MR.GSENS : []).forEach(k => {
       const sp = wrap.querySelector('#gsp' + k), gl = wrap.querySelector('#ggL' + k), gr = wrap.querySelector('#ggR' + k);
       sp.addEventListener('input', () => { G.rows[k].sp = parseFloat(sp.value) || 0; changed(true); });
       [gl, gr].forEach((inp, j) => { signCls(inp); inp.addEventListener('input', () => { G.rows[k][j ? 'gR' : 'gL'] = parseFloat(inp.value) || 0; signCls(inp); changed(true); }); });
@@ -777,13 +829,14 @@ const MR = (() => {
     h.textContent = bump ? 'With bump switches each signal is 1 while pressed and 0 otherwise.'
       : `Setpoint ${rangeNow().toFixed(2)} m (the sensor’s range) makes the signal pure closeness: 0 when nothing is in range. A smaller setpoint makes it an error: positive when too close, negative when too far.`;
     box.appendChild(h);
+    if (goalRows(G)) { const q = document.createElement('p'); q.className = 'hint'; q.textContent = 'Goal rows use the goal sensors, which point the same way as the others but only see the goal marker (like an IR beacon or a color camera). They read 0 when the robot is on top of the goal.'; box.appendChild(q); }
   }
   function showContrib(S, info) {
     if ($('gridPanel').hidden || !S) return;
     const G = activeGrid(), sig = MR.signals(S, G), f = v => (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(3);
-    SENS.forEach((k, i) => {
+    Object.keys(sig).forEach(k => {
       const a = $('cL' + k), b = $('cR' + k); if (!a) return;
-      a.textContent = f(G.rows[k].gL * sig[i]); b.textContent = f(G.rows[k].gR * sig[i]);
+      a.textContent = f(G.rows[k].gL * sig[k]); b.textContent = f(G.rows[k].gR * sig[k]);
     });
     const g = MR.gridWheels(S, G), override = info && info.trig >= 0;
     $('tL').textContent = override ? 'trigger' : clampV(g.vl).toFixed(3) + ' m/s';
@@ -818,14 +871,18 @@ const MR = (() => {
     $('worldHint').textContent = P ? '4 m × 2 m, edges wrap around' : '';
     $('mazeRow').hidden = P; $('playRow').hidden = !P; $('playHelp').hidden = !P; $('clear').hidden = P;
     $('second').checked = !!st.play.second.on; $('secondPreset').hidden = !(P && st.play.second.on);
-    $('lDist').textContent = P ? 'Time near an object' : 'Distance from goal';
+    const GO = !!goalObj();
+    $('goalOn').checked = !!st.play.goal.on;
+    $('lDist').textContent = P ? (GO ? 'Time at goal' : 'Time near an object') : 'Distance from goal';
     $('lHits').textContent = P ? 'Object hits' : 'Wall hits';
-    $('lRuns').textContent = P ? 'Objects visited' : 'Runs reaching goal';
+    $('lRuns').textContent = P ? (GO ? 'First reached goal' : 'Objects visited') : 'Runs reaching goal';
     $('rangeFact').textContent = rangeNow().toFixed(2) + ' m';
     cv.classList.toggle('edit', P);
     if (P && sen().type !== 'bump') $('sensorHint').textContent = 'Each sensor reports the distance to the nearest object or vehicle inside a ±30° cone around where it points, up to 1.50 m. Like a real sensor, it is less sensitive near the edge of its cone, so objects there read as farther away. Sensors see across the wrapped edges.';
+    if (GO) $('sensorHint').textContent += ' Three goal sensors point the same ways and see only the goal marker, up to 1.50 m.';
+    if (GO && st.mode === 'react') { note.textContent = 'React triggers use the object sensors only. Use Braitenberg or Hybrid to steer with the goal sensors.'; note.hidden = false; }
     if (P && st.mode === 'open') { note.textContent = 'In the open world a program just runs once and stops. Try Braitenberg for the classic vehicles.'; note.hidden = false; }
-    $('legend').innerHTML = P ? '<span><i class="sw act"></i>Trail (fades after 20 s)</span><span><i class="sw ray" style="border-top-color:var(--s1)"></i><i class="sw ray" style="border-top-color:var(--s2);margin-left:-4px"></i><i class="sw ray" style="border-top-color:var(--s3);margin-left:-4px"></i>Sensors: left, front, right</span>' + (st.play.second.on ? '<span><i class="sw" style="border-top-color:var(--planned)"></i>Second vehicle</span>' : '')
+    $('legend').innerHTML = P ? '<span><i class="sw act"></i>Trail (fades after 20 s)</span><span><i class="sw ray" style="border-top-color:var(--s1)"></i><i class="sw ray" style="border-top-color:var(--s2);margin-left:-4px"></i><i class="sw ray" style="border-top-color:var(--s3);margin-left:-4px"></i>Sensors: left, front, right</span>' + (GO ? '<span><i class="gdot"></i>Goal marker</span>' : '') + (st.play.second.on ? '<span><i class="sw" style="border-top-color:var(--planned)"></i>Second vehicle</span>' : '')
       : (st.mode === 'open' ? '<span><i class="sw dash"></i>Planned (perfect robot)</span>' : '') +
       '<span><i class="sw act"></i>This run</span><span><i class="sw old"></i>Earlier runs</span><span><i class="sw ray" style="border-top-color:var(--s1)"></i><i class="sw ray" style="border-top-color:var(--s2);margin-left:-4px"></i><i class="sw ray" style="border-top-color:var(--s3);margin-left:-4px"></i>Sensors: left, front, right</span>';
     if (!playing) $('run').textContent = P ? (pv ? 'Resume' : 'Play') : 'Run';
@@ -1036,7 +1093,7 @@ const MR = (() => {
   }
   function sample(p) {
     const Sx = p.S || {}, c = p.cmd || [0, 0];
-    return { t: p.t, L: Sx.bump ? +Sx.contact[0] : Sx.L, F: Sx.bump ? +Sx.contact[1] : Sx.F, R: Sx.bump ? +Sx.contact[2] : Sx.R, cl: c[0], cr: c[1], bump: !!Sx.bump };
+    return { t: p.t, L: Sx.bump ? +Sx.contact[0] : Sx.L, F: Sx.bump ? +Sx.contact[1] : Sx.F, R: Sx.bump ? +Sx.contact[2] : Sx.R, cl: c[0], cr: c[1], bump: !!Sx.bump, GL: Sx.GL, GF: Sx.GF, GR: Sx.GR };
   }
   // dashed reference level per sensor: grid setpoints (Braitenberg, Hybrid) or trigger thresholds (React)
   function refs() {
@@ -1051,6 +1108,7 @@ const MR = (() => {
     document.querySelectorAll('#chartMode button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === st.chartMode));
     $('chartHint').textContent = st.chartMode === 'bars' ? 'Right now · bars move with the robot' : 'Last 10 s · hover a graph to read values';
     $('legSens').innerHTML = `<b>Sensors${bump ? ' (pressed = 1)' : ' (m)'}</b><span><i style="border-color:var(--s1)"></i>Left</span><span><i style="border-color:var(--s2)"></i>Front</span><span><i style="border-color:var(--s3)"></i>Right</span>` +
+      (goalObj() && !bump ? `<span><i class="dot" style="border-color:var(--ink)"></i>Goal sensors${st.chartMode === 'bars' ? ' (lighter bars)' : ' (dotted, same colors)'}</span>` : '') +
       (rf.list.length ? `<span><i class="dash" style="border-color:var(--ink)"></i>${rf.kind}${st.chartMode === 'bars' ? '' : ' (in each sensor’s color)'}</span>` : '');
     $('legMot').innerHTML = `<b>Motor commands (m/s)</b><span><i style="border-color:var(--s1)"></i>Left wheel</span><span><i style="border-color:var(--s3)"></i>Right wheel</span><span><i class="dash" style="border-color:var(--s2)"></i>Forward speed (average)</span>`;
   }
@@ -1082,7 +1140,7 @@ const MR = (() => {
     }
     g.save(); g.beginPath(); g.rect(padL, padT - 2, pw, ph + 4); g.clip();
     spec.series.forEach(sr => {
-      g.strokeStyle = css(sr.col); g.lineWidth = 2; g.lineJoin = 'round'; g.setLineDash(sr.dash ? [5, 4] : []);
+      g.strokeStyle = css(sr.col); g.lineWidth = sr.dot ? 2.5 : 2; g.lineJoin = 'round'; g.setLineDash(sr.dot ? [1.5, 4] : sr.dash ? [5, 4] : []); g.lineCap = sr.dot ? 'round' : 'butt';
       g.beginPath(); data.forEach((p, i) => { const x = Xc(p.t), y = Yc(Math.max(spec.min, Math.min(spec.max, sr.v(p)))); i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke();
     });
     g.setLineDash([]); g.restore();
@@ -1129,10 +1187,10 @@ const MR = (() => {
       g.fillText(sr.name, cx, padT + ph + 6);
       if (last) {
         const val = sr.v(last), y = Yc(val), top = Math.min(y, base), hgt = Math.max(1, Math.abs(base - y)), r = Math.min(4, hgt / 2, bw / 2);
-        g.fillStyle = css(sr.col); g.beginPath();
+        g.fillStyle = css(sr.col); g.globalAlpha = sr.dot ? 0.5 : 1; g.beginPath();
         if (y <= base) { g.moveTo(cx - bw / 2, base); g.lineTo(cx - bw / 2, top + r); g.arcTo(cx - bw / 2, top, cx - bw / 2 + r, top, r); g.lineTo(cx + bw / 2 - r, top); g.arcTo(cx + bw / 2, top, cx + bw / 2, top + r, r); g.lineTo(cx + bw / 2, base); }
         else { g.moveTo(cx - bw / 2, base); g.lineTo(cx - bw / 2, y - r); g.arcTo(cx - bw / 2, y, cx - bw / 2 + r, y, r); g.lineTo(cx + bw / 2 - r, y); g.arcTo(cx + bw / 2, y, cx + bw / 2, y - r, r); g.lineTo(cx + bw / 2, base); }
-        g.closePath(); g.fill();
+        g.closePath(); g.fill(); g.globalAlpha = 1;
       }
       const rf = (spec.refs || []).find(r => r.k === sr.k);
       if (rf) {                                              // setpoint: dashed ink line with a halo so it reads over the bar
@@ -1158,7 +1216,7 @@ const MR = (() => {
       ? { min: 0, max: 1, ticks: [0, 1], fmt: (v, full) => full ? (v ? 'pressed' : 'open') : String(v), series: [
           { name: 'Left', col: '--s1', v: p => p.L }, { name: 'Front', col: '--s2', v: p => p.F }, { name: 'Right', col: '--s3', v: p => p.R }] }
       : { min: 0, max: R, ticks: R > 1 ? [0, 0.5, 1.0, 1.5] : [0, 0.1, 0.2, 0.3, 0.4], fmt: (v, full) => v.toFixed(full ? 3 : (R > 1 ? 1 : 1)), series: [
-          { name: 'Left', col: '--s1', v: p => p.L }, { name: 'Front', col: '--s2', v: p => p.F }, { name: 'Right', col: '--s3', v: p => p.R }].map((o, i) => Object.assign(o, { k: SENS[i] })), refs: rf });
+          { name: 'Left', col: '--s1', v: p => p.L }, { name: 'Front', col: '--s2', v: p => p.F }, { name: 'Right', col: '--s3', v: p => p.R }].map((o, i) => Object.assign(o, { k: SENS[i] })).concat(goalObj() ? MR.GSENS.map((k, i) => ({ name: { GL: 'Goal L', GF: 'Goal F', GR: 'Goal R' }[k], col: SCOL[i], dot: true, v: p => p[k] === undefined ? R : p[k] })) : []), refs: rf });
     draw1(chM, data, { min: -VMAX, max: VMAX, ticks: [-0.4, -0.2, 0, 0.2, 0.4], xlabels: true, fmt: (v, full) => (v > 0 && full ? '+' : '') + v.toFixed(full ? 3 : 1), series: [
       { name: 'Left wheel', col: '--s1', v: p => p.cl }, { name: 'Right wheel', col: '--s3', v: p => p.cr }, { name: 'Forward', col: '--s2', dash: true, v: p => (p.cl + p.cr) / 2 }] });
   }
@@ -1208,7 +1266,7 @@ const MR = (() => {
     const dtw = lastP ? Math.min(0.1, (ts - lastP) / 1000) : 0; lastP = ts;
     const n = Math.min(800, Math.max(1, Math.round(dtw * +$('speed').value / DT)));
     for (let k = 0; k < n; k++) {
-      pv.forEach((v, i) => MR.stepPlay(v, lampList(), pv.filter((_, j) => j !== i)));
+      pv.forEach((v, i) => MR.stepPlay(v, lampList(), pv.filter((_, j) => j !== i), goalObj()));
       pt += DT;
       if (Math.round(pt / DT) % 3 === 0) { pv.forEach((v, i) => ptrail[i].push({ x: v.x, y: v.y, t: pt })); phist.push(sample({ t: pv[0].t, S: pv[0].S, cmd: pv[0].cmd })); }
     }
@@ -1220,9 +1278,10 @@ const MR = (() => {
   function playStatus() {
     const pill = $('pill'), v = pv ? pv[0] : null;
     $('sTime').textContent = (v ? v.t : 0).toFixed(1) + ' s';
-    $('sDist').textContent = (v ? v.near : 0).toFixed(1) + ' s';
+    const GO = !!goalObj();
+    $('sDist').textContent = (v ? (GO ? v.atGoal : v.near) : 0).toFixed(1) + ' s';
     $('sHits').textContent = String(v ? v.hits : 0);
-    $('sRuns').textContent = (v ? v.visited.size : 0) + ' / ' + lampList().length;
+    $('sRuns').textContent = GO ? (v && v.firstGoal != null ? v.firstGoal.toFixed(1) + ' s' : '–') : (v ? v.visited.size : 0) + ' / ' + lampList().length;
     if (!v) { pill.className = 'pill'; pill.textContent = 'Ready: press Play'; return; }
     if (!playing) { pill.className = 'pill'; pill.textContent = 'Paused'; return; }
     pill.className = 'pill warn';
@@ -1265,6 +1324,18 @@ const MR = (() => {
     });
     ctx.restore();
   }
+  function goalAt(x, y) {                      // goal marker: a bullseye in the goal color
+    const r = MR.GOAL_R * S;
+    ctx.fillStyle = css('--goal'); ctx.beginPath(); ctx.arc(X(x), Y(y), r, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = css('--floor'); ctx.beginPath(); ctx.arc(X(x), Y(y), r * 0.62, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = css('--goal'); ctx.beginPath(); ctx.arc(X(x), Y(y), r * 0.3, 0, Math.PI * 2); ctx.fill();
+  }
+  function goalSight(p, Sx) {                  // dotted line to the goal while any goal sensor sees it
+    const G = goalObj(); if (!G || !Sx || Sx.GL === undefined || Math.min(Sx.GL, Sx.GF, Sx.GR) >= MR.PRANGE - 1e-6) return;
+    const gx = p.x + MR.wrapD(G.x - p.x, MR.PW), gy = p.y + MR.wrapD(G.y - p.y, MR.PH);
+    ctx.save(); ctx.strokeStyle = css('--goal'); ctx.lineWidth = 2; ctx.setLineDash([2, 5]); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(X(p.x), Y(p.y)); ctx.lineTo(X(gx), Y(gy)); ctx.stroke(); ctx.restore();
+  }
   const handlePos = p => ({ x: p.x + Math.cos(p.th) * 0.24, y: p.y + Math.sin(p.th) * 0.24 });
   function drawPlay() {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1277,6 +1348,7 @@ const MR = (() => {
     ctx.stroke();
     ctx.save(); ctx.beginPath(); ctx.rect(ax, ay, aw, ah); ctx.clip();
     const ps = poses();
+    if (goalObj()) copiesOf(st.play.goal.x, st.play.goal.y, MR.GOAL_R + 0.01).forEach(([x, y]) => goalAt(x, y));
     lampList().forEach(l => copiesOf(l.x, l.y, MR.LAMP_R + 0.01).forEach(([x, y]) => lampAt(x, y)));
     ptrail.forEach((tr, i) => {
       const col = i ? css('--planned') : css('--actual');
@@ -1291,10 +1363,11 @@ const MR = (() => {
     });
     let S0v = null, info0 = null;
     ps.forEach(p => {
-      const Sx = p.v ? p.v.S : MR.sensePlay(p.x, p.y, p.th, { ...sen(), noise: false }, objsFor(p.i, ps));
+      const Sx = p.v ? p.v.S : MR.sensePlay(p.x, p.y, p.th, { ...sen(), noise: false }, objsFor(p.i, ps), goalObj());
       if (p.i === 0) { S0v = Sx; info0 = p.v ? p.v.info : null; }
       const reach = RAD + (Sx && !Sx.bump ? Math.max(Sx.L, Sx.F, Sx.R) : 0.1);
       copiesOf(p.x, p.y, reach).forEach(([x, y]) => playSensors({ x, y, th: p.th }, Sx));   // cones wrap across edges
+      copiesOf(p.x, p.y, MR.PRANGE).forEach(([x, y]) => goalSight({ x, y }, Sx));
       copiesOf(p.x, p.y, 0.2).forEach(([x, y]) => robot({ x, y, th: p.th }, p.i ? css('--planned') : css('--actual')));
       if (!playing) {
         const h = handlePos(p);
@@ -1327,6 +1400,7 @@ const MR = (() => {
     const ps = poses(); dragging = null;
     if (!playing) for (const q of ps) { const h = handlePos(q); if (Math.hypot(h.x - p.x, h.y - p.y) < 0.07) { dragging = { kind: 'aim', i: q.i }; break; } }
     if (!dragging) for (const q of ps) if (Math.hypot(q.x - p.x, q.y - p.y) < 0.11) { dragging = { kind: 'veh', i: q.i }; break; }
+    if (!dragging && goalObj() && Math.hypot(st.play.goal.x - p.x, st.play.goal.y - p.y) < 0.12) dragging = { kind: 'goal' };
     if (!dragging) for (const l of lampList()) if (Math.hypot(l.x - p.x, l.y - p.y) < 0.11) { dragging = { kind: 'lamp', lamp: l }; break; }
     if (!dragging) dragging = { kind: 'new', x: p.x, y: p.y, moved: false };
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
@@ -1337,6 +1411,7 @@ const MR = (() => {
     if (dragging.kind === 'aim') { const q = poses().find(q => q.i === dragging.i); setPose(dragging.i, { th: Math.atan2(p.y - q.y, p.x - q.x) }); }
     else if (dragging.kind === 'veh') setPose(dragging.i, { x: p.x, y: p.y });
     else if (dragging.kind === 'lamp') { dragging.lamp.x = p.x; dragging.lamp.y = p.y; }
+    else if (dragging.kind === 'goal') { st.play.goal.x = p.x; st.play.goal.y = p.y; }
     else if (Math.hypot(p.x - dragging.x, p.y - dragging.y) > 0.03) dragging.moved = true;
     if (!playing) draw();
   });
@@ -1368,14 +1443,16 @@ const MR = (() => {
       const L = MR.PLAY_LAYOUTS[key];
       st.play.lamps = L.lamps.map(([x, y], i) => ({ x, y, id: i }));
       st.play.start = { x: L.start[0], y: L.start[1], th: L.start[2] };
+      if (L.goal) { st.play.goal = { on: true, x: L.goal[0], y: L.goal[1] }; if (st.mode === 'brait') st.pgrid = clone(MR.PLAY_GRID_PRESETS.goalLove); }
     }
-    resetPlay(); save(); syncUI(); setStatus(); draw();
+    resetPlay(); save(); renderGrid(); syncUI(); setStatus(); draw();
   }
   $('layout').addEventListener('change', e => { const k = e.target.value; if (!k) return; e.target.value = ''; applyLayout(k); });
   $('secondPreset').innerHTML = Object.entries(MR.PLAY_GRID_PRESETS).map(([k, p]) => `<option value="${k}">${esc(p.name)}</option>`).join('');
   $('secondPreset').value = st.play.second.preset;
   $('showCones').checked = st.showCones !== false;
   $('showCones').addEventListener('change', e => { st.showCones = e.target.checked; save(); if (!playing) draw(); });
+  $('goalOn').addEventListener('change', e => { st.play.goal.on = e.target.checked; save(); renderGrid(); syncUI(); setStatus(); if (!playing) draw(); renderCode(); });
   $('second').addEventListener('change', e => { st.play.second.on = e.target.checked; resetPlay(); save(); syncUI(); draw(); });
   $('secondPreset').addEventListener('change', e => { st.play.second.preset = e.target.value; if (pv && pv[1]) rebuildVehicle(pv[1], 1); save(); });
   document.querySelectorAll('#worlds button').forEach(b => b.addEventListener('click', () => {
@@ -1394,7 +1471,14 @@ const MR = (() => {
 const float W = 0.20;            // track width (m)
 `;
   }
-  function readBlock() {
+  function readBlock(G) {
+    const gl = G && goalRows(G) ? `
+  float dGL = readGoalMeters(LEFT_GOAL);  // goal sensors see only the goal marker (m)
+  float dGF = readGoalMeters(FRONT_GOAL);
+  float dGR = readGoalMeters(RIGHT_GOAL);` : '';
+    return readObj() + gl;
+  }
+  function readObj() {
     if (bump()) return `  bool bL = pressed(LEFT_BUMP);
   bool bF = pressed(FRONT_BUMP);
   bool bR = pressed(RIGHT_BUMP);`;
@@ -1402,7 +1486,11 @@ const float W = 0.20;            // track width (m)
   float dF = readMeters(FRONT_SENSOR);
   float dR = readMeters(RIGHT_SENSOR);`;
   }
-  function helpers(motorOnly) {
+  function helpers(motorOnly, G) {
+    const gs = G && goalRows(G) ? `// distance in meters to the goal marker, or 1.50 if this sensor cannot see it
+// (for example an IR beacon receiver or a color camera that looks for the goal color)
+float readGoalMeters(int sensor) { /* your goal sensor code */ }
+` : '';
     const sens = bump() ? `// true while the switch is pressed (wired to GND, with INPUT_PULLUP)
 bool pressed(int pin) { return digitalRead(pin) == LOW; }
 ` : `// distance in meters to the nearest object, capped at the sensor's range
@@ -1410,7 +1498,7 @@ float readMeters(int sensor) { /* your sensor code */ }   // ${isPlay() ? 'playg
 `;
     return `
 // ---------- helpers you write for your own robot ----------
-${motorOnly ? '' : sens}
+${motorOnly ? '' : sens}${gs}
 // wheel speeds in m/s -> PWM; measure your robot to get this right
 void setWheels(float vLeft, float vRight) { /* your motor code */ }
 `;
@@ -1430,18 +1518,22 @@ void setWheels(float vLeft, float vRight) { /* your motor code */ }
     return out;
   }
   function gridDecl(G) {
-    const rows = SENS.map(k => `const float SP_${k} = ${n3(G.rows[k].sp)},  G_${k}_LEFT = ${n2(G.rows[k].gL)},  G_${k}_RIGHT = ${n2(G.rows[k].gR)};`).join('\n');
+    const keys = SENS.concat(goalRows(G) ? MR.GSENS : []);
+    const rows = keys.map(k => `const float SP_${k} = ${n3(G.rows[k].sp)},  G_${k}_LEFT = ${n2(G.rows[k].gL)},  G_${k}_RIGHT = ${n2(G.rows[k].gR)};`).join('\n');
     return `const float BASE = ${n2(G.base)};     // m/s
 // one row per sensor: setpoint (m), gain to left motor (1/s), gain to right motor (1/s)
 ${bump() ? '// (bump switches: the setpoints are not used)\n' : ''}${rows}
 `;
   }
   function gridBody(G, ind) {
-    const sig = bump() ? SENS.map(k => `${ind}float s${k} = b${k} ? 1 : 0;`).join('\n')
-      : SENS.map(k => `${ind}float s${k} = SP_${k} - d${k};`).join('\n');
-    return `${sig}${bump() ? '' : '     // signal: how much closer than the setpoint'}
-${ind}float vLeft  = BASE + G_L_LEFT  * sL + G_F_LEFT  * sF + G_R_LEFT  * sR;
-${ind}float vRight = BASE + G_L_RIGHT * sL + G_F_RIGHT * sF + G_R_RIGHT * sR;
+    const gk = goalRows(G) ? MR.GSENS : [];
+    const sig = (bump() ? SENS.map(k => `${ind}float s${k} = b${k} ? 1 : 0;`).join('\n')
+      : SENS.map(k => `${ind}float s${k} = SP_${k} - d${k};`).join('\n')) + (bump() ? '' : '     // signal: how much closer than the setpoint')
+      + gk.map(k => `\n${ind}float s${k} = SP_${k} - d${k};`).join('');
+    const sum = side => SENS.concat(gk).map(k => `G_${k}_${side} * s${k}`).join(' + ');
+    return `${sig}
+${ind}float vLeft  = BASE + ${sum('LEFT')};
+${ind}float vRight = BASE + ${sum('RIGHT')};
 ${ind}setWheels(vLeft, vRight);`;
   }
   const interruptNote = R => R.interrupt ? `
@@ -1466,36 +1558,36 @@ void loop() {
 ` + helpers(true);
     }
     if (m === 'react') {
-      const R = st.react;
+      const R = activeReact();
       return header('react (triggers and routines)') + interruptNote(R) + `
 // Triggers are checked in order; the first one that fires runs its routine.
 void loop() {
-${readBlock()}
+${readObj()}
 
 ${triggerChain(R, `    setWheels(${n2(clampV(R.default[0]))}, ${n2(clampV(R.default[1]))});      // default: no trigger`)}  delay(10);
 }
 ` + helpers();
     }
     if (m === 'brait') {
-      const G = st.grid;
+      const G = activeGrid();
       return header('Braitenberg gain grid') + gridDecl(G) + `
 void loop() {
-${readBlock()}
+${readBlock(G)}
 
 ${gridBody(G, '  ')}
   delay(10);
 }
-` + helpers();
+` + helpers(false, G);
     }
-    const R = st.hreact, G = st.hgrid;
+    const R = activeReact(), G = activeGrid();
     return header('hybrid (gain grid + triggers)') + gridDecl(G) + interruptNote(R) + `
 // A trigger that fires runs its routine; otherwise the gain grid drives.
 void loop() {
-${readBlock()}
+${readBlock(G)}
 
 ${triggerChain(R, gridBody(G, '    '))}  delay(10);
 }
-` + helpers();
+` + helpers(false, G);
   }
   function renderCode() { if (!$('code').hidden) $('code').textContent = genCode(); }
   $('codeToggle').addEventListener('click', () => {
