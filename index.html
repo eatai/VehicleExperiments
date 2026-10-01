@@ -145,57 +145,119 @@ tr.total .contrib { font-size: 13px; color: var(--ink); }
 .formula { font-family: var(--f-mono); font-size: 13px; background: var(--chip); border-radius: 8px; padding: 8px 10px; }
 table.ggrid th { white-space: normal; vertical-align: bottom; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ===== Layout C: arena left; live readings, sensors, controller right ===== */
+:root { --mission-bg: #FFF6E0; --mission-line: #EED9A4; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --mission-bg: #2E2A1E; --mission-line: #5E5030; } }
+:root[data-theme="dark"] { --mission-bg: #2E2A1E; --mission-line: #5E5030; }
+body { padding: 0 0 28px; }
+.wrap { max-width: 1680px; gap: 12px; }
+.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 18px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.topbar h1 { font-size: 21px; margin-right: 6px; }
+.topbar select { padding: 6px 10px; font-weight: 600; max-width: 100%; }
+.topbar .seg button { padding: 5px 10px; }
+.main { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 12px; padding: 0 18px; align-items: start; }
+.side { display: grid; gap: 12px; min-width: 0; }
+.arena { position: sticky; top: 8px; }
+.below { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 0 18px; align-items: start; }
+@media (max-width: 1000px) { .main, .below { grid-template-columns: minmax(0, 1fr); } .arena { position: static; } }
+.card { padding: 12px 14px; gap: 9px; }
+.card h2 { font-size: 16px; }
+canvas.chart { height: 104px; }
+.mission { background: var(--mission-bg); border: 1px solid var(--mission-line); border-radius: 8px; padding: 7px 11px; font-size: 14px; display: flex; gap: 4px 12px; align-items: baseline; }
+.mission .mt { flex: 1 1 auto; min-width: 0; }
+.mission .st:empty { display: none; }
+@media (max-width: 700px) { .mission { flex-wrap: wrap; } }
+.mission b { font-weight: 700; }
+.mission .st { flex: 0 1 auto; text-align: right; font-family: var(--f-mono); font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.mission.pass { border-color: var(--good); }
+.mission.pass .st { color: var(--good); }
+.hintbox { margin: 0; font-size: 13.5px; background: var(--chip); border-radius: 8px; padding: 7px 11px; }
+.compact { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.compact .seg button { padding: 5px 10px; }
+/* sliders */
+.sl { display: grid; grid-template-columns: minmax(70px, 1fr) 3.9em; align-items: center; gap: 6px; min-width: 0; }
+.sl output { font-family: var(--f-mono); font-size: 12px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.sl input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; margin: 0; background: transparent; cursor: pointer; }
+.sl input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--track, var(--line)); }
+.sl input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: var(--track, var(--line)); }
+.sl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: var(--panel); border: 2px solid var(--ink); }
+.sl input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--panel); border: 2px solid var(--ink); }
+.sl input[type=range]:focus-visible { outline: 2px solid var(--planned); outline-offset: 2px; }
+.ends { display: flex; justify-content: space-between; font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; padding-right: 4.3em; }
+table.ggrid { table-layout: fixed; }
+table.ggrid td, table.ggrid th { text-align: left; padding: 4px 4px; }
+table.ggrid th:first-child { width: 86px; }
+table.ggrid .sl { grid-template-columns: minmax(0, 1fr) 3.3em; gap: 4px; }
+table.ggrid .sl output { font-size: 11.5px; }
+table.ggrid .ends { padding-right: 3.6em; }
+table.ggrid td:first-child { white-space: nowrap; font-size: 14px; }
+td input.time { width: 4.4em; }
+.mazeinfo { font-size: 13px; color: var(--muted); }
+@media (max-width: 1320px) { .topbar h1 { font-size: 18px; } #diffLabel, .pblabel, label[for="chalSel"] { display: none; } .topbar { gap: 8px 10px; } .arena .controls button { padding: 7px 10px; } }
+.statrow { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(0, 2.2fr); gap: 8px; align-items: center; }
+.statrow .pill { font-size: 13.5px; }
+.statrow .stat { padding: 5px 9px; } .statrow .stat b { font-size: 15px; }
+@media (max-width: 700px) { .statrow { grid-template-columns: minmax(0, 1fr); } }
 </style>
 
 <div class="wrap">
-  <header>
+  <header class="topbar">
     <h1>Vehicles: A Sandbox for Control</h1>
-    <p class="sub">Start with a list of motor commands and watch it drift. Then give the robot three sensors (left, front, right) and let a feedback controller steer. Switch on real-world problems to see which approach survives them.</p>
+    <label class="hint" for="chalSel">Challenge</label>
+    <select id="chalSel" aria-label="Challenge"></select>
+    <span class="hint" id="chalCount"></span>
+    <span class="spacer"></span>
+    <div class="seg" id="worlds" role="group" aria-label="World"><button data-w="maze">Maze</button><button data-w="play">Playground</button></div>
+    <span class="hint" id="diffLabel">Maze</span>
+    <div class="seg" id="diff" role="group" aria-label="Maze difficulty"><button data-d="easy">Easy</button><button data-d="medium">Medium</button><button data-d="hard">Hard</button></div>
   </header>
 
-  <div class="grid top">
-    <div class="col">
-      <section class="card" aria-label="World">
-        <div class="controls"><div class="seg" id="worlds" role="group" aria-label="World"><button data-w="maze">Maze</button><button data-w="play">Playground</button></div>
-          <span class="hint" id="worldHint"></span></div>
-        <canvas id="maze" role="img" aria-label="Maze with the robot, its sensor readings, and its paths"></canvas>
-        <div class="legend" id="legend"></div>
-        <div class="controls">
-          <button class="primary" id="run">Run</button>
-          <button id="reset">Reset robot</button>
-          <button id="clear">Clear earlier runs</button>
-          <span class="spacer"></span>
-          <label class="hint" for="speed">Playback</label>
-          <select id="speed"><option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option><option value="8">8×</option></select>
-        </div>
-        <div class="controls" id="mazeRow">
-          <button id="newMaze">New maze</button>
-          <button id="classic">Classic maze</button>
-          <span class="hint" id="mazeName">Classic maze (from the slides)</span>
-        </div>
-        <div class="controls" id="playRow" hidden>
-          <label class="hint" for="layout">Layout</label>
-          <select id="layout"><option value="">Choose…</option><option value="one">One object</option><option value="two">Two objects</option><option value="corner">Object near a corner (wraps)</option><option value="goalBehind">Goal behind an object</option><option value="random">Random objects</option><option value="clear">No objects</option></select>
-          <label class="sw-inline"><input type="checkbox" id="goalOn"> Goal marker</label>
-          <label class="sw-inline"><input type="checkbox" id="second"> Second vehicle</label>
-          <label class="sw-inline"><input type="checkbox" id="showCones" checked> Show sensor cones</label>
-          <select id="secondPreset" aria-label="Second vehicle behavior" hidden></select>
-        </div>
-        <p class="hint" id="playHelp" hidden>Click empty floor to add an object (up to 5). Drag an object or a vehicle to move it; drag the small handle in front of a vehicle to aim it. Double-click an object to remove it. Turn on the goal marker and drag it anywhere; the robot sees it with its own goal sensors, and objects do not block them. With two vehicles, each one senses the other as an object.</p>
-        <span class="pill" id="pill" aria-live="polite">Ready: press Run</span>
-        <div class="stats">
-          <div class="stat"><small id="lDist">Distance from goal</small><b id="sDist">–</b></div>
-          <div class="stat"><small>Time</small><b id="sTime">0.0 s</b></div>
-          <div class="stat"><small id="lHits">Wall hits</small><b id="sHits">0</b></div>
-          <div class="stat"><small id="lRuns">Runs reaching goal</small><b id="sRuns">0 / 0</b></div>
-        </div>
-      </section>
-    </div>
-    <div class="col">
+  <div class="main">
+    <section class="card arena" aria-label="Arena">
+      <div class="mission" id="mission" aria-live="polite"><span class="mt"><b id="misTitle"></b> <span id="misText"></span></span><span class="st" id="misStatus"></span></div>
+      <p class="hintbox" id="hintBox" hidden></p>
+      <canvas id="maze" role="img" aria-label="Arena with the robot, its sensor readings, and its paths"></canvas>
+      <div class="legend" id="legend"></div>
+      <div class="controls">
+        <button class="primary" id="run">Run</button>
+        <button id="reset">Reset robot</button>
+        <button id="clear">Clear earlier runs</button>
+        <button id="hintBtn" hidden>Hint</button>
+        <button id="solBtn" hidden>Show a solution</button>
+        <span class="spacer"></span>
+        <label class="hint pblabel" for="speed">Playback</label>
+        <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option><option value="16">16×</option></select>
+      </div>
+      <div class="controls" id="mazeRow">
+        <button id="newMaze">New maze</button>
+        <button id="classic">Classic maze</button>
+        <span class="mazeinfo" id="mazeName"></span>
+        <span class="spacer"></span>
+        <label class="sw-inline"><input type="checkbox" id="revStart"> Start facing backward</label>
+      </div>
+      <div class="controls" id="playRow" hidden>
+        <label class="hint" for="layout">Layout</label>
+        <select id="layout"><option value="">Choose…</option><option value="one">One object</option><option value="two">Two objects</option><option value="four">Four objects</option><option value="corner">Object near a corner (wraps)</option><option value="goalBehind">Goal behind an object</option><option value="random">Random objects</option><option value="clear">No objects</option></select>
+        <label class="sw-inline"><input type="checkbox" id="goalOn"> Goal marker</label>
+        <label class="sw-inline"><input type="checkbox" id="second"> Second vehicle</label>
+        <select id="secondPreset" aria-label="Second vehicle behavior" hidden></select>
+        <label class="sw-inline"><input type="checkbox" id="showCones" checked> Sensor cones</label>
+      </div>
+      <p class="hint" id="playHelp" hidden>Click empty floor to add an object (up to 5). Drag objects, the goal, or a vehicle to move them; drag the small handle in front of a vehicle to aim it. Double-click an object to remove it.</p>
+      <div class="statrow"><span class="pill" id="pill" aria-live="polite">Ready: press Run</span>
+      <div class="stats">
+        <div class="stat"><small id="lDist">To goal</small><b id="sDist">–</b></div>
+        <div class="stat"><small>Time</small><b id="sTime">0.0 s</b></div>
+        <div class="stat"><small id="lHits">Wall hits</small><b id="sHits">0</b></div>
+        <div class="stat"><small id="lRuns">Goal runs</small><b id="sRuns">0 / 0</b></div>
+      </div></div>
+    </section>
+
+    <div class="side">
       <section class="card" aria-label="Live readings">
-        <div class="controls"><h2>Live readings</h2><span class="spacer"></span>
+        <div class="controls"><h2>Live readings</h2><span class="hint" id="chartHint"></span><span class="spacer"></span>
           <div class="seg" id="chartMode" role="group" aria-label="Graph style"><button data-v="lines">Lines</button><button data-v="bars">Bars</button></div></div>
-        <p class="hint" id="chartHint">Last 10 s · hover a graph to read values</p>
         <div class="chartblock">
           <div class="clegend" id="legSens"></div>
           <canvas id="chSens" class="chart" role="img" aria-label="Sensor readings over the last 10 seconds"></canvas>
@@ -205,41 +267,32 @@ table.ggrid th { white-space: normal; vertical-align: bottom; }
           <canvas id="chMot" class="chart" role="img" aria-label="Wheel motor commands over the last 10 seconds"></canvas>
         </div>
       </section>
-    </div>
-  </div>
 
-  <div class="grid">
-    <div class="col">
-      <section class="card">
-        <h2>Sensors</h2>
-        <div class="row"><span>Type</span>
-          <div class="seg" id="sType" role="group" aria-label="Sensor type"><button data-v="proximity">Proximity</button><button data-v="bump">Bump</button></div>
-        </div>
-        <div class="row"><span>Side sensors point</span>
-          <div class="seg" id="sAngle" role="group" aria-label="Side sensor angle"><button data-v="90">Straight out (90°)</button><button data-v="45">Angled (45°)</button><button data-v="30">Forward (30°)</button></div>
-        </div>
+      <section class="card" aria-label="Sensors">
+        <div class="compact"><h2>Sensors</h2><span class="spacer"></span>
+          <div class="seg" id="sType" role="group" aria-label="Sensor type"><button data-v="proximity">Proximity</button><button data-v="bump">Bump</button></div></div>
+        <div class="compact"><span class="hint">Side sensors point</span>
+          <div class="seg" id="sAngle" role="group" aria-label="Side sensor angle"><button data-v="90">90°</button><button data-v="45">45°</button><button data-v="30">30°</button></div>
+          <span class="spacer"></span><span class="hint">Range <b id="rangeFact">0.40 m</b></span></div>
         <p class="hint" id="sensorHint"></p>
       </section>
 
-      <section class="card">
-        <h2>Controller</h2>
-        <div class="facts"><span>Track width <code>W = 0.20 m</code></span><span>Forward <code>v = (vR + vL) / 2</code></span><span>Turning <code>ω = (vR − vL) / W</code></span><span>Sensor range <code id="rangeFact">0.40 m</code></span></div>
-        <div class="seg" id="modes" role="group" aria-label="Controller mode">
-          <button data-mode="open">Open-loop</button>
-          <button data-mode="react">React</button>
-          <button data-mode="brait">Braitenberg</button>
-          <button data-mode="hybrid">Hybrid</button>
-        </div>
+      <section class="card" aria-label="Controller">
+        <div class="compact"><h2>Controller</h2><span class="spacer"></span>
+          <div class="seg" id="modes" role="group" aria-label="Controller mode">
+            <button data-mode="open">Open-loop</button><button data-mode="react">React</button><button data-mode="brait">Braitenberg</button><button data-mode="hybrid">Hybrid</button>
+          </div></div>
+        <div class="facts"><span>Track width <code>W = 0.20 m</code></span><span>Forward <code>v = (vR + vL) / 2</code></span><span>Turning <code>ω = (vR − vL) / W</code></span><span>Top speed <code>0.40 m/s</code></span></div>
         <p class="desc" id="modeDesc"></p>
         <p class="note" id="modeNote" hidden></p>
         <div id="openPanel">
           <div class="tablewrap">
             <table>
-              <thead><tr><th>#</th><th>Left (m/s)</th><th>Right (m/s)</th><th>Time (s)</th><th>What it does</th><th><span hidden>Delete</span></th></tr></thead>
+              <thead><tr><th>#</th><th>Left (m/s)<div class="ends"><span>−0.4</span><span>+0.4</span></div></th><th>Right (m/s)<div class="ends"><span>−0.4</span><span>+0.4</span></div></th><th>Time (s)</th><th>What it does</th><th><span hidden>Delete</span></th></tr></thead>
               <tbody id="prog"></tbody>
             </table>
           </div>
-          <div class="tablefoot" style="margin-top:10px">
+          <div class="tablefoot" style="margin-top:8px">
             <button id="add">Add step</button>
             <span class="spacer"></span>
             <label class="hint" for="preset">Load</label>
@@ -247,105 +300,168 @@ table.ggrid th { white-space: normal; vertical-align: bottom; }
               <option value="">Choose…</option>
               <option value="slide">Slide example (2 steps)</option>
               <option value="blank">Empty program</option>
-              <option value="solution">Example solution (classic maze)</option>
             </select>
           </div>
-          <p class="hint" style="margin-top:8px">Speeds are limited to ±0.40 m/s. One maze square is 0.30 m.</p>
+          <p class="hint" style="margin-top:6px">One maze square is 0.30 m. Use arrow keys on a slider for fine steps.</p>
         </div>
         <div id="gridPanel" hidden></div>
         <div id="reactPanel" hidden></div>
       </section>
     </div>
-    <div class="col">
+  </div>
 
-
-      <section class="card">
-        <h2>Real-world problems</h2>
-        <div class="toggles">
-          <label class="tog"><input type="checkbox" id="tMismatch"><b>Motor mismatch</b><small>Left motor runs 5% slower than the right</small></label>
-          <label class="tog"><input type="checkbox" id="tSlip"><b>Wheel slip</b><small>Random slip, different on every run</small></label>
-          <label class="tog"><input type="checkbox" id="tBattery"><b>Low battery</b><small>Motors 8% slow at the start, 15% by 20 s</small></label>
-          <label class="tog"><input type="checkbox" id="tLag"><b>Speed-up lag</b><small>Motors take about a quarter second to reach speed</small></label>
-          <label class="tog"><input type="checkbox" id="tStart"><b>Start pose error</b><small>Set down up to 4° and 2 cm off</small></label>
-          <label class="tog"><input type="checkbox" id="sNoise"><b>Sensor noise</b><small id="noiseDesc">Proximity readings jitter randomly</small></label>
-          <div class="param" id="noiseRow" hidden style="padding: 2px 4px 8px 52px"><label for="noiseAmt">Noise amount</label><input type="range" id="noiseAmt" min="0.002" max="0.03" step="0.001" value="0.006"><output for="noiseAmt" id="noiseOut">0.006 m</output></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="controls"><h2>Arduino code</h2><span class="spacer"></span>
-          <button id="codeToggle" aria-expanded="false">Show code</button>
-          <button id="copy" hidden>Copy</button>
-        </div>
-        <p class="hint">The same controller written for an Arduino, using the settings above. It is for reading and adapting; this page does not run it.</p>
-        <pre class="code" id="code" hidden></pre>
-      </section>
-
-    </div>
+  <div class="below">
+    <section class="card">
+      <h2>Real-world problems</h2>
+      <div class="toggles">
+        <label class="tog"><input type="checkbox" id="tMismatch"><b>Motor mismatch</b><small>Left motor runs 5% slower than the right</small></label>
+        <label class="tog"><input type="checkbox" id="tSlip"><b>Wheel slip</b><small>Random slip, different on every run</small></label>
+        <label class="tog"><input type="checkbox" id="tBattery"><b>Low battery</b><small>Motors 8% slow at the start, 15% by 20 s</small></label>
+        <label class="tog"><input type="checkbox" id="tLag"><b>Speed-up lag</b><small>Motors take about a quarter second to reach speed</small></label>
+        <label class="tog"><input type="checkbox" id="tStart"><b>Start pose error</b><small>Set down up to 4° and 2 cm off</small></label>
+        <label class="tog"><input type="checkbox" id="sNoise"><b>Sensor noise</b><small id="noiseDesc">Proximity readings jitter randomly</small></label>
+        <div class="param" id="noiseRow" hidden style="padding: 2px 4px 8px 52px"><label for="noiseAmt">Noise amount</label><input type="range" id="noiseAmt" min="0.002" max="0.03" step="0.001" value="0.006"><output for="noiseAmt" id="noiseOut">0.006 m</output></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="controls"><h2>Arduino code</h2><span class="spacer"></span>
+        <button id="codeToggle" aria-expanded="false">Show code</button>
+        <button id="copy" hidden>Copy</button>
+      </div>
+      <p class="hint">The same controller written for an Arduino, using the settings above. It is for reading and adapting; this page does not run it.</p>
+      <pre class="code" id="code" hidden></pre>
+    </section>
   </div>
 </div>
 
 <script>
 // ---------- Maze Runner core: world, sensors, controllers, simulation ----------
 const MR = (() => {
-  const CELL = 0.30, COLS = 7, ROWS = 6, TRACK = 0.20, RAD = 0.075, VMAX = 0.40, DT = 0.01;
-  const RANGE = 0.40, BUMP_REACH = 0.015;
+  const CELL = 0.30, COLS = 15, ROWS = 10, TRACK = 0.20, RAD = 0.075, VMAX = 0.40, DT = 0.01;
+  const RANGE = 0.40, BUMP_REACH = 0.015, WALL_T = 0.02, MW = COLS * CELL, MH = ROWS * CELL;
 
-  // ----- mazes -----
-  const CLASSIC = { cells: [[0,5],[0,4],[0,3],[1,3],[2,3],[3,3],[3,2],[3,1],[4,1],[5,1],[6,1]] };
-  function makeMaze(cells) {
-    const open = new Uint8Array(COLS * ROWS);
-    cells.forEach(([c, r]) => { open[r * COLS + c] = 1; });
-    const [c0, r0] = cells[0], [c1, r1] = cells[1];
-    const startTh = Math.atan2(-(r1 - r0), c1 - c0);   // y up
-    return { cells, open, start: cells[0], goal: cells[cells.length - 1], startTh };
+  // ----- mazes: a 15 x 10 grid of 0.30 m squares with thin (2 cm) wall panels -----
+  // cell (c, r): column c from the left, row r from the TOP; world y points up
+  const CLASSIC = { cells: [[0,5],[0,4],[0,3],[1,3],[2,3],[3,3],[3,2],[3,1],[4,1],[5,1],[6,1]].map(([c, r]) => [c, r + 4]) };
+  function rngOf(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const id = (c, r) => r * COLS + c;
+  const shuffle = (arr, rnd) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; };
+  const DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];   // north, east, south, west (rows grow downward)
+  // build from a set of open cells and a set of open passages between neighbors
+  function build(open, pass, start, goal, info) {
+    const has = (a, b) => pass.has(a < b ? a + ',' + b : b + ',' + a);
+    const rects = [], h = WALL_T / 2;
+    const cellBox = (c, r) => [c * CELL, (ROWS - r - 1) * CELL, (c + 1) * CELL, (ROWS - r) * CELL];
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const [x0, y0, x1, y1] = cellBox(c, r);
+      if (!open[id(c, r)]) { rects.push([x0 - h, y0 - h, x1 + h, y1 + h]); continue; }
+      if (c < COLS - 1 && open[id(c + 1, r)] && !has(id(c, r), id(c + 1, r))) rects.push([x1 - h, y0 - h, x1 + h, y1 + h]);
+      if (r < ROWS - 1 && open[id(c, r + 1)] && !has(id(c, r), id(c, r + 1))) rects.push([x0 - h, y0 - h, x1 + h, y0 + h]);
+    }
+    rects.push([-h, -h, h, MH + h], [MW - h, -h, MW + h, MH + h], [-h, -h, MW + h, h], [-h, MH - h, MW + h, MH + h]);
+    // rects near each cell, for fast sensing and collisions
+    const reach = RANGE + RAD + 0.05, near = [];
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const [x0, y0, x1, y1] = cellBox(c, r), list = [];
+      rects.forEach((q, i) => { if (q[2] > x0 - reach && q[0] < x1 + reach && q[3] > y0 - reach && q[1] < y1 + reach) list.push(i); });
+      near[id(c, r)] = list;
+    }
+    const [sc, sr] = start;
+    const nb = DIRS.map(([dc, dr]) => { const c = sc + dc, r = sr + dr; return c >= 0 && r >= 0 && c < COLS && r < ROWS && open[id(c, r)] && has(id(sc, sr), id(c, r)); });
+    const d = nb[0] ? 0 : nb[1] ? 1 : nb[3] ? 3 : 2;
+    const startTh = [Math.PI / 2, 0, -Math.PI / 2, Math.PI][d];
+    return Object.assign({ open, pass, has, rects, near, start, goal, startTh }, info);
   }
-  function randomMaze() {
-    const DIRS = [[0,-1],[1,0],[0,1],[-1,0]];
-    for (let attempt = 0; attempt < 5000; attempt++) {
-      const path = [[0, ROWS - 1]], used = new Set(['0,' + (ROWS - 1)]);
+  function fromPath(cells, info) {
+    const open = new Uint8Array(COLS * ROWS), pass = new Set();
+    cells.forEach(([c, r], i) => { open[id(c, r)] = 1; if (i) { const a = id(...cells[i - 1]), b = id(c, r); pass.add(a < b ? a + ',' + b : b + ',' + a); } });
+    return build(open, pass, cells[0], cells[cells.length - 1], info);
+  }
+  function makeMaze(cells) { return fromPath(cells, { kind: 'classic', diff: 'easy', seed: 0 }); }
+  // Easy: one winding path, no branches, long straights; unused squares are solid
+  // Medium: a main path with tight U-turns plus dead-end side branches
+  function pathMaze(seed, medium) {
+    const rnd = rngOf(seed);
+    for (let attempt = 0; attempt < 4000; attempt++) {
+      const path = [[0, ROWS - 1]], used = new Set([id(0, ROWS - 1)]);
       let dir = -1, turns = 0;
-      const okCell = (c, r, pc, pr) => {
-        if (c < 0 || c >= COLS || r < 0 || r >= ROWS || used.has(c + ',' + r)) return false;
-        for (const [dx, dy] of DIRS) { const k = (c + dx) + ',' + (r + dy); if (used.has(k) && !(c + dx === pc && r + dy === pr)) return false; }
-        return true;
-      };
-      for (let seg = 0; seg < 12; seg++) {
-        const choices = [0, 1, 2, 3].filter(d => d !== dir && (dir < 0 || (d + 2) % 4 !== dir)).sort(() => Math.random() - .5);
+      for (let seg = 0; seg < 50 && path.length < (medium ? 36 : 42); seg++) {
+        const choices = shuffle([0, 1, 2, 3].filter(d => d !== dir && (dir < 0 || (d + 2) % 4 !== dir)), rnd);
         let moved = false;
         for (const d of choices) {
-          const len = 2 + Math.floor(Math.random() * 2);
+          const len = medium ? 1 + Math.floor(rnd() * 4) : 2 + Math.floor(rnd() * 4);
           const add = []; let [pc, pr] = path[path.length - 1], ok = true;
           for (let k = 0; k < len; k++) {
             const c = pc + DIRS[d][0], r = pr + DIRS[d][1];
-            if (!okCell(c, r, pc, pr)) { ok = false; break; }
-            add.push([c, r]); used.add(c + ',' + r); pc = c; pr = r;
+            if (c < 0 || r < 0 || c >= COLS || r >= ROWS || used.has(id(c, r))) { ok = false; break; }
+            add.push([c, r]); used.add(id(c, r)); pc = c; pr = r;
           }
-          if (!ok) { add.forEach(([c, r]) => used.delete(c + ',' + r)); continue; }
+          if (!ok) { add.forEach(([c, r]) => used.delete(id(c, r))); continue; }
           add.forEach(p => path.push(p)); if (dir >= 0) turns++; dir = d; moved = true; break;
         }
         if (!moved) break;
       }
-      if (path.length >= 11 && turns >= 3) return makeMaze(path);
+      const [gc, gr] = path[path.length - 1];
+      if (!(path.length >= 30 && turns >= (medium ? 10 : 7) && gc + (ROWS - 1 - gr) >= 11)) continue;
+      const open = new Uint8Array(COLS * ROWS), pass = new Set(), link = (a, b) => pass.add(a < b ? a + ',' + b : b + ',' + a);
+      path.forEach(([c, r], i) => { open[id(c, r)] = 1; if (i) link(id(...path[i - 1]), id(c, r)); });
+      if (medium) {   // dead-end side branches off the main path (not off the first or last squares)
+        let spurs = 0;
+        for (let k = 0; k < 400 && spurs < 7; k++) {
+          const i = 2 + Math.floor(rnd() * (path.length - 4)); let [c, r] = path[i];
+          const d = Math.floor(rnd() * 4), len = 1 + Math.floor(rnd() * 3), cells = [];
+          for (let j = 0; j < len; j++) { c += DIRS[d][0]; r += DIRS[d][1]; if (c < 0 || r < 0 || c >= COLS || r >= ROWS || open[id(c, r)]) break; cells.push([c, r]); }
+          if (!cells.length) continue;
+          let prev = path[i]; cells.forEach(([cc, rr]) => { open[id(cc, rr)] = 1; link(id(...prev), id(cc, rr)); prev = [cc, rr]; });
+          spurs++;
+        }
+      }
+      return build(open, pass, path[0], path[path.length - 1], { kind: 'random', diff: medium ? 'medium' : 'easy', seed });
     }
     return makeMaze(CLASSIC.cells);
+  }
+  // Hard: a full maze with dead ends, loops and 4-way intersections
+  function gridMaze(seed, hard) {
+    const rnd = rngOf(seed), open = new Uint8Array(COLS * ROWS).fill(1), pass = new Set(), deg = new Uint8Array(COLS * ROWS);
+    const link = (a, b) => { pass.add(a < b ? a + ',' + b : b + ',' + a); deg[a]++; deg[b]++; };
+    const seen = new Uint8Array(COLS * ROWS), stack = [[0, ROWS - 1, -1]]; seen[id(0, ROWS - 1)] = 1;
+    while (stack.length) {
+      const [c, r, d0] = stack[stack.length - 1];
+      let opts = [0, 1, 2, 3].filter(d => { const cc = c + DIRS[d][0], rr = r + DIRS[d][1]; return cc >= 0 && rr >= 0 && cc < COLS && rr < ROWS && !seen[id(cc, rr)]; });
+      if (!hard) opts = opts.filter(() => deg[id(c, r)] < 3);
+      if (!opts.length) { stack.pop(); continue; }
+      const d = opts.includes(d0) && rnd() < 0.45 ? d0 : opts[Math.floor(rnd() * opts.length)];   // some straight runs
+      const cc = c + DIRS[d][0], rr = r + DIRS[d][1];
+      seen[id(cc, rr)] = 1; link(id(c, r), id(cc, rr)); stack.push([cc, rr, d]);
+    }
+    for (let k = 0; k < COLS * ROWS; k++) if (!seen[k]) open[k] = 0;   // (only if degree limits left squares unreached)
+    if (hard) {   // knock out walls to make loops and crossings
+      const walls = [];
+      for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+        if (c < COLS - 1 && open[id(c, r)] && open[id(c + 1, r)] && !pass.has(id(c, r) + ',' + id(c + 1, r))) walls.push([id(c, r), id(c + 1, r)]);
+        if (r < ROWS - 1 && open[id(c, r)] && open[id(c, r + 1)] && !pass.has(id(c, r) + ',' + id(c, r + 1))) walls.push([id(c, r), id(c, r + 1)]);
+      }
+      shuffle(walls, rnd).slice(0, Math.round(walls.length * 0.12)).forEach(([a, b]) => link(a, b));
+    }
+    return build(open, pass, [0, ROWS - 1], [COLS - 1, 0], { kind: 'random', diff: hard ? 'hard' : 'medium', seed });
+  }
+  function randomMaze(diff, seed) {
+    if (seed == null) seed = 1 + Math.floor(Math.random() * 99999);
+    return diff === 'hard' ? gridMaze(seed, true) : pathMaze(seed, diff === 'medium');
   }
 
   // ----- geometry -----
   const center = (m, c, r) => ({ x: (c + .5) * CELL, y: (ROWS - r - .5) * CELL });
+  const cellOf = (x, y) => id(Math.max(0, Math.min(COLS - 1, Math.floor(x / CELL))), Math.max(0, Math.min(ROWS - 1, ROWS - 1 - Math.floor(y / CELL))));
+  const inRect = (q, x, y) => x > q[0] && x < q[2] && y > q[1] && y < q[3];
   function wallAt(m, x, y) {
-    if (x < 0 || y < 0 || x >= COLS * CELL || y >= ROWS * CELL) return true;
-    const c = Math.floor(x / CELL), r = ROWS - 1 - Math.floor(y / CELL);
-    return !m.open[r * COLS + c];
+    if (x < 0 || y < 0 || x >= MW || y >= MH) return true;
+    for (const i of m.near[cellOf(x, y)]) if (inRect(m.rects[i], x, y)) return true;
+    return false;
   }
   function hitsWall(m, x, y) {
-    if (x - RAD < 0 || x + RAD > COLS * CELL || y - RAD < 0 || y + RAD > ROWS * CELL) return true;
-    const c0 = Math.floor((x - RAD) / CELL), c1 = Math.floor((x + RAD) / CELL);
-    const y0 = Math.floor((y - RAD) / CELL), y1 = Math.floor((y + RAD) / CELL);
-    for (let c = c0; c <= c1; c++) for (let yy = y0; yy <= y1; yy++) {
-      const r = ROWS - 1 - yy;
-      if (c < 0 || c >= COLS || r < 0 || r >= ROWS || m.open[r * COLS + c]) continue;
-      const nx = Math.max(c * CELL, Math.min(x, (c + 1) * CELL)), ny = Math.max(yy * CELL, Math.min(y, (yy + 1) * CELL));
+    for (const i of m.near[cellOf(x, y)]) {
+      const q = m.rects[i], nx = Math.max(q[0], Math.min(x, q[2])), ny = Math.max(q[1], Math.min(y, q[3]));
       if ((x - nx) ** 2 + (y - ny) ** 2 < RAD * RAD) return true;
     }
     return false;
@@ -353,8 +469,17 @@ const MR = (() => {
   // distance from the robot's edge to the first wall along direction a (capped at RANGE)
   function ray(m, x, y, a) {
     const ca = Math.cos(a), sa = Math.sin(a);
-    for (let d = RAD; d <= RAD + RANGE; d += 0.004) if (wallAt(m, x + ca * d, y + sa * d)) return Math.max(0, d - RAD);
-    return RANGE;
+    let best = RAD + RANGE;
+    for (const i of m.near[cellOf(x, y)]) {
+      const q = m.rects[i];
+      let t0 = 0, t1 = best;
+      if (Math.abs(ca) < 1e-12) { if (x <= q[0] || x >= q[2]) continue; }
+      else { let a1 = (q[0] - x) / ca, a2 = (q[2] - x) / ca; if (a1 > a2) [a1, a2] = [a2, a1]; t0 = Math.max(t0, a1); t1 = Math.min(t1, a2); }
+      if (Math.abs(sa) < 1e-12) { if (y <= q[1] || y >= q[3]) continue; }
+      else { let b1 = (q[1] - y) / sa, b2 = (q[3] - y) / sa; if (b1 > b2) [b1, b2] = [b2, b1]; t0 = Math.max(t0, b1); t1 = Math.min(t1, b2); }
+      if (t0 <= t1 && t0 < best) best = t0;
+    }
+    return Math.max(0, Math.min(RANGE, best - RAD));
   }
   function bump(m, x, y, a) {
     for (const off of [-0.45, 0, 0.45]) {
@@ -379,7 +504,7 @@ const MR = (() => {
   // ----- controllers: return {v, w} (m/s, rad/s) -----
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   // geometry of a straight 30 cm corridor, as seen by a side sensor at angle a (deg)
-  const sideTarget = a => (CELL / 2) / Math.sin(a * Math.PI / 180) - RAD;       // reading when centered
+  const sideTarget = a => ((CELL - WALL_T) / 2) / Math.sin(a * Math.PI / 180) - RAD;       // reading when centered
   const openAt = a => sideTarget(a) + 0.08;                                       // reading that means "opening"
   const passDist = a => CELL / 2 + (CELL / 2) / Math.tan(a * Math.PI / 180);     // opening seen -> corner center
   const SENS = ['L', 'F', 'R'];
@@ -446,12 +571,12 @@ const MR = (() => {
   // ----- simulation -----
   function simulate(m, cfg) {
     const o = cfg.problems || {}, s0 = center(m, m.start[0], m.start[1]), g = center(m, m.goal[0], m.goal[1]);
-    let x = s0.x, y = s0.y, th = m.startTh;
+    let x = s0.x, y = s0.y, th = m.startTh + (cfg.reverseStart ? Math.PI : 0);
     if (o.start) { th += (Math.random() * 2 - 1) * 4 * Math.PI / 180; x += (Math.random() * 2 - 1) * .02; y += (Math.random() * 2 - 1) * .02; }
     const ctl = cfg.mode === 'open' ? null : makeController(cfg);
     const steps = []; let acc = 0;
     if (!ctl) cfg.program.forEach(([, , d]) => { acc += Math.max(0, d || 0); steps.push(acc); });
-    const TEND = ctl ? 60 : Math.min(acc, 60);
+    const TEND = ctl ? (cfg.tmax || 240) : Math.min(acc, 120);
     let t = 0, vl = 0, vr = 0, eL = 1, eR = 1, nextSlip = 0, end = null, bumps = 0, hits = 0, inContact = false, prevC = [false, false, false];
     let lastProg = { t: 0, x, y };
     let S = sense(m, x, y, th, cfg.sensor);
@@ -503,8 +628,6 @@ const MR = (() => {
     aggression: { name: 'Aggression (crossed, +)',  base: 0.12, rows: { L: row(0.40, 0, 0.5), F: row(0.40, 0, 0), R: row(0.40, 0.5, 0) } },
     love:       { name: 'Love (same side, −)',      base: 0.20, rows: { L: row(0.40, -0.5, 0), F: row(0.40, 0, 0), R: row(0.40, 0, -0.5) } },
     explorer:   { name: 'Explorer (crossed, −)',    base: 0.20, rows: { L: row(0.40, 0, -0.5), F: row(0.40, 0, 0), R: row(0.40, -0.5, 0) } },
-    center:     { name: 'Center in the hallway',    base: 0.15, rows: { L: row(0.075, 0.5, -0.5), F: row(0.40, -0.4, -0.4), R: row(0.075, -0.5, 0.5) } },
-    follow:     { name: 'Hold the right wall',    base: 0.10, rows: { L: row(0.40, 0, 0), F: row(0.40, -0, 0), R: row(0.075, -0.8, 0.8) } },
   };
   const tr = (s, on, cond, th, routine) => ({ s, on, cond, th, routine });
   const REACT_PRESETS = {
@@ -512,25 +635,13 @@ const MR = (() => {
       tr('F', true, 'lt', 0.05, [[-0.10, -0.10, 0.3], [0.125, -0.125, 1.26]]),
       tr('L', true, 'lt', 0.03, [[0.15, 0.05, 0.3]]),
       tr('R', true, 'lt', 0.03, [[0.05, 0.15, 0.3]]) ] },
-    righthand: { name: 'Hand on the right wall', default: [0.15, 0.15], interrupt: false, triggers: [
-      tr('F', true, 'lt', 0.08, [[-0.125, 0.125, 1.26]]),
-      tr('R', true, 'gt', 0.20, [[0.15, 0.15, 0.8], [0.125, -0.125, 1.26], [0.15, 0.15, 1.4]]),
-      tr('L', true, 'lt', 0.06, [[0.15, 0.08, 0.25]]) ] },
   };
-  const HYBRID_PRESETS = {
-    wallcorner: { name: 'Right wall + corner turn', grid: 'follow', react: { default: [0.15, 0.15], interrupt: false, triggers: [
-      tr('F', true, 'lt', 0.09, [[-0.125, 0.125, 1.26]]),
-      tr('L', false, 'lt', 0.03, [[0.15, 0.05, 0.3]]),
-      tr('R', false, 'lt', 0.03, [[0.05, 0.15, 0.3]]) ] } },
-    centersafe: { name: 'Center + back up if stuck', grid: 'center', react: { default: [0.15, 0.15], interrupt: false, triggers: [
-      tr('F', true, 'lt', 0.02, [[-0.10, -0.10, 0.4], [-0.125, 0.125, 0.63]]),
-      tr('L', false, 'lt', 0.02, [[0.15, 0.05, 0.3]]),
-      tr('R', false, 'lt', 0.02, [[0.05, 0.15, 0.3]]) ] } },
-  };
+  const HYBRID_PRESETS = {};   // maze hybrid answers live behind each challenge's "Show a solution"
 
 
-  // =================== Playground: open 4 m x 2 m world whose edges wrap ===================
-  const PW = 4.0, PH = 2.0, PRANGE = 1.5, LAMP_R = 0.06, CONE = 30 * Math.PI / 180;
+
+  // =================== Playground: open 4.5 m x 3 m world whose edges wrap ===================
+  const PW = 4.5, PH = 3.0, PRANGE = 1.5, LAMP_R = 0.06, CONE = 30 * Math.PI / 180;
   const wrapD = (d, L) => d - L * Math.round(d / L);                 // shortest difference on a ring
   const wrapP = (v, L) => ((v % L) + L) % L;
   const angDiff = a => Math.atan2(Math.sin(a), Math.cos(a));
@@ -582,7 +693,7 @@ const MR = (() => {
   function makeVehicle(x, y, th, cfg) {
     return { x, y, th, vl: 0, vr: 0, eL: 1, eR: 1, nextSlip: 0, t: 0, cfg, ctl: cfg.mode === 'open' ? null : makeController(cfg),
       prog: cfg.program ? (() => { const st = []; let a = 0; cfg.program.forEach(([, , d]) => { a += Math.max(0, d || 0); st.push(a); }); return st; })() : [],
-      hits: 0, inContact: false, near: 0, atGoal: 0, firstGoal: null, visited: new Set(), S: null, info: null, step: 0, done: false };
+      hits: 0, inContact: false, near: 0, atGoal: 0, firstGoal: null, touched: new Set(), visited: new Set(), S: null, info: null, step: 0, done: false };
   }
   function stepPlay(v, lamps, others, goal) {
     const cfg = v.cfg, o = cfg.problems || {};
@@ -605,6 +716,7 @@ const MR = (() => {
     const nx = wrapP(v.x + sp * Math.cos(v.th) * DT, PW), ny = wrapP(v.y + sp * Math.sin(v.th) * DT, PH);
     v.th += w * DT; v.t += DT;
     const blocked = objs.some(ob => Math.hypot(wrapD(ob.x - nx, PW), wrapD(ob.y - ny, PH)) < RAD + ob.r);
+    objs.forEach(ob => { if (Math.hypot(wrapD(ob.x - nx, PW), wrapD(ob.y - ny, PH)) < RAD + ob.r + 0.01) v.touched.add(ob.id); });
     if (blocked) { if (!v.inContact) { v.hits++; v.th += (Math.random() * 2 - 1) * 3 * Math.PI / 180; } v.inContact = true; }
     else { v.x = nx; v.y = ny; v.inContact = false; }
     let nearNow = false;
@@ -617,10 +729,11 @@ const MR = (() => {
     v.blocked = blocked;
   }
   const PLAY_LAYOUTS = {
-    one: { name: 'One object', lamps: [[2.6, 1.0]], start: [1.0, 0.6, 0.35] },
-    two: { name: 'Two objects', lamps: [[1.6, 1.25], [2.7, 0.7]], start: [0.5, 0.5, 0.3] },
-    corner: { name: 'Object near a corner (wraps)', lamps: [[3.85, 1.85]], start: [0.9, 0.7, 2.8] },
-    goalBehind: { name: 'Goal behind an object', lamps: [[1.9, 1.0]], start: [0.9, 1.0, 0], goal: [2.9, 1.0] },
+    one: { name: 'One object', lamps: [[2.9, 1.5]], start: [1.1, 0.9, 0.35] },
+    two: { name: 'Two objects', lamps: [[1.8, 1.9], [3.0, 1.05]], start: [0.6, 0.75, 0.3] },
+    corner: { name: 'Object near a corner (wraps)', lamps: [[4.35, 2.8]], start: [1.0, 1.05, 2.8] },
+    goalBehind: { name: 'Goal behind an object', lamps: [[2.15, 1.5]], start: [1.15, 1.5, 0], goal: [3.15, 1.5] },
+    four: { name: 'Four objects', lamps: [[1.2, 0.8], [3.3, 0.8], [1.2, 2.2], [3.3, 2.2]], start: [2.25, 1.5, 0.4] },
   };
   const prow = (sp, gL, gR) => ({ sp, gL, gR });
   const G0 = () => ({ GL: prow(1.5, 0, 0), GF: prow(1.5, 0, 0), GR: prow(1.5, 0, 0) });
@@ -630,14 +743,182 @@ const MR = (() => {
     aggression: { name: 'Aggression (crossed, +)', base: 0.06, rows: withGoal({ L: prow(1.5, 0, 0.12), F: prow(1.5, 0.06, 0.06), R: prow(1.5, 0.12, 0) }) },
     love:       { name: 'Love (same side, −)',     base: 0.22, rows: withGoal({ L: prow(1.5, -0.10, 0), F: prow(1.5, -0.16, -0.16), R: prow(1.5, 0, -0.10) }) },
     explorer:   { name: 'Explorer (crossed, −)',   base: 0.22, rows: withGoal({ L: prow(1.5, 0, -0.10), F: prow(1.5, -0.06, -0.06), R: prow(1.5, -0.10, 0) }) },
-    goalLove:   { name: 'Goal: love it, fear objects', base: 0.22, rows: withGoal({ L: prow(1.5, 0.15, 0), F: prow(1.5, 0.10, -0.05), R: prow(1.5, 0, 0.15) },
-                  { GL: prow(1.5, -0.10, 0), GF: prow(1.5, -0.15, -0.15), GR: prow(1.5, 0, -0.10) }) },
-    goalAggr:   { name: 'Goal: attack it, fear objects', base: 0.08, rows: withGoal({ L: prow(1.5, 0.15, 0), F: prow(1.5, 0.10, -0.05), R: prow(1.5, 0, 0.15) },
-                  { GL: prow(1.5, 0, 0.12), GF: prow(1.5, 0.06, 0.06), GR: prow(1.5, 0.12, 0) }) },
   };
 
-  return { GSENS, GOAL_R, gridKeys, PW, PH, PRANGE, LAMP_R, CONE, wrapD, wrapP, sensePlay, makeVehicle, stepPlay, PLAY_LAYOUTS, PLAY_GRID_PRESETS, SENS, signals, gridWheels, fires, REACT_PRESETS, GRID_PRESETS, HYBRID_PRESETS, sideTarget, openAt, passDist, CELL, COLS, ROWS, TRACK, RAD, RANGE, VMAX, DT, CLASSIC, makeMaze, randomMaze, center, wallAt, sense, simulate };
+  return { GSENS, GOAL_R, gridKeys, PW, PH, PRANGE, LAMP_R, CONE, wrapD, wrapP, sensePlay, makeVehicle, stepPlay, PLAY_LAYOUTS, PLAY_GRID_PRESETS, SENS, signals, gridWheels, fires, REACT_PRESETS, GRID_PRESETS, HYBRID_PRESETS, sideTarget, openAt, passDist, CELL, COLS, ROWS, MW, MH, WALL_T, TRACK, RAD, RANGE, VMAX, DT, CLASSIC, makeMaze, randomMaze, rngOf, cellOf, hitsWall, ray, center, wallAt, sense, simulate };
 })();
+
+
+</script>
+<script>
+// ---------- Challenges: setup, live checks, hints and verified solutions ----------
+const CH = ((MR) => {
+  const { SENS, GSENS, RANGE, PRANGE, DT, CELL, RAD, LAMP_R, GOAL_R, PW, PH, wrapD } = MR;
+  const T = (s, on, cond, th, routine) => ({ s, on, cond, th, routine });
+  const row = (sp, gL, gR) => ({ sp, gL, gR });
+
+  // ----- blank controllers (what a student starts from) -----
+  function blankGrid(play) {
+    const R = play ? PRANGE : RANGE, rows = {};
+    SENS.forEach(k => { rows[k] = row(R, 0, 0); });
+    if (play) GSENS.forEach(k => { rows[k] = row(PRANGE, 0, 0); });
+    return { base: 0.10, rows };
+  }
+  function blankReact(play) {
+    const th = play ? 0.30 : 0.10;
+    return { default: [0.15, 0.15], interrupt: false, triggers: ['F', 'L', 'R'].map(s => T(s, false, 'lt', th, [[0, 0, 0.5]])) };
+  }
+  const grid = (play, base, rows) => { const g = blankGrid(play); g.base = base; Object.keys(rows).forEach(k => { g.rows[k] = rows[k]; }); return g; };
+
+  // ----- verified solutions (see the test harness) -----
+  const CLASSIC_PLAN = [[0.2, 0.2, 3.0], [0.1, -0.1, 1.57], [0.2, 0.2, 4.5], [-0.1, 0.1, 1.57], [0.2, 0.2, 3.0], [0.1, -0.1, 1.57], [0.2, 0.2, 4.5]];
+  const WEAK_LEFT_PLAN = [[0.21, 0.2, 3.0], [0.105, -0.1, 1.57], [0.21, 0.2, 4.5], [-0.105, 0.1, 1.57], [0.21, 0.2, 3.0], [0.105, -0.1, 1.57], [0.21, 0.2, 4.5]];
+  const HAND_ON_WALL = { default: [0.15, 0.15], interrupt: false, triggers: [
+    T('F', true, 'lt', 0.06, [[-0.125, 0.125, 1.26]]),
+    T('R', true, 'gt', 0.15, [[0.15, 0.15, 0.6], [0.125, -0.125, 1.26], [0.15, 0.15, 1.0]]),
+    T('L', true, 'lt', 0.05, [[0.15, 0.08, 0.3], [0.08, 0.15, 0.3]]) ] };
+  const BUMP_HUG = { default: [0.15, 0.05], interrupt: false, triggers: [
+    T('F', true, 'lt', 0.05, [[-0.1, -0.1, 0.2], [-0.125, 0.125, 0.6]]),
+    T('R', true, 'lt', 0.03, [[0, 0.15, 0.3]]),
+    T('L', true, 'lt', 0.03, [[0.15, 0, 0.3]]) ] };
+  const FAST = { default: [0.3, 0.3], interrupt: false, triggers: [
+    T('F', true, 'lt', 0.06, [[-0.2, 0.2, 0.79]]),
+    T('R', true, 'gt', 0.15, [[0.3, 0.3, 0.37], [0.2, -0.2, 0.79], [0.3, 0.3, 0.5]]),
+    T('L', true, 'lt', 0.05, [[0.3, 0.16, 0.15], [0.16, 0.3, 0.15]]) ] };
+  const REVERSE = { default: [-0.15, -0.15], interrupt: false, triggers: [
+    T('R', true, 'gt', 0.15, [[-0.15, -0.15, 0.67], [-0.125, 0.125, 1.26], [-0.15, -0.15, 1.33]]),
+    T('L', true, 'gt', 0.15, [[-0.15, -0.15, 0.67], [0.125, -0.125, 1.26], [-0.15, -0.15, 1.33]]),
+    T('F', false, 'lt', 0.05, [[0, 0, 0.5]]) ] };
+  const CENTER = grid(false, 0.15, { L: row(0.065, 1.0, -1.0), F: row(0.25, -0.8, -0.8), R: row(0.065, -1.0, 1.0) });
+  const HUG = grid(false, 0.10, { L: row(0.40, 0, 0), F: row(0.40, -1.0, 1.0), R: row(0.073, -0.5, 0.5) });
+  const BOUNCE = { default: [0.15, 0.15], interrupt: false, triggers: [
+    T('F', true, 'lt', 0.005, [[-0.15, -0.15, 0.5], [-0.125, 0.125, 1.26]]),
+    T('L', true, 'lt', 0.005, [[-0.15, -0.15, 0.5], [0.125, -0.125, 1.26]]),
+    T('R', true, 'lt', 0.005, [[-0.15, -0.15, 0.5], [-0.125, 0.125, 1.26]]) ] };
+
+  // ----- live statistics for a maze run, advanced point by point -----
+  function mazeAcc(m) {
+    return { m, i: 0, t: 0, hits: 0, firstHitT: null, offSum: 0, offN: 0, band: 0, dist: 0, rev: 0, prevBlocked: false };
+  }
+  function advance(a, pts, upto) {
+    for (let i = Math.max(1, a.i + 1); i <= upto && i < pts.length; i++) {
+      const p = pts[i], q = pts[i - 1];
+      a.t = p.t;
+      if (p.blocked && !a.prevBlocked) { a.hits++; if (a.firstHitT == null) a.firstHitT = p.t; }
+      a.prevBlocked = !!p.blocked;
+      const d = Math.hypot(p.x - q.x, p.y - q.y); a.dist += d;
+      if ((p.x - q.x) * Math.cos(q.th) + (p.y - q.y) * Math.sin(q.th) < -1e-6) a.rev += d;
+      const dl = MR.ray(a.m, p.x, p.y, p.th + Math.PI / 2), dr = MR.ray(a.m, p.x, p.y, p.th - Math.PI / 2);
+      if (dl < 0.2 && dr < 0.2) { a.offSum += Math.abs(dl - dr) / 2; a.offN++; }
+      if (a.firstHitT == null && dr >= 0.02 && dr <= 0.05) a.band += DT;
+      a.i = i;
+    }
+    return a;
+  }
+  // ----- live statistics for the playground (vehicle 1) -----
+  function playAcc() { return { t: 0, dist: 0, hits: 0, stillT: 0, stoppedGap: null, atGoalRun: 0, atGoalMax: 0, touched: new Set(), lamps: 0, x: null, y: null }; }
+  function playStep(a, v, lamps, goal) {
+    if (a.x != null) { const d = Math.hypot(wrapD(v.x - a.x, PW), wrapD(v.y - a.y, PH)); a.dist += d; a.stillT = d / DT < 0.01 ? a.stillT + DT : 0; }
+    a.x = v.x; a.y = v.y; a.t = v.t; a.hits = v.hits; a.lamps = lamps.length;
+    v.touched.forEach(id => { if (String(id).startsWith('lamp')) a.touched.add(id); });
+    if (a.stillT >= 3 && lamps.length) {
+      const gap = Math.min(...lamps.map(l => Math.hypot(wrapD(l.x - v.x, PW), wrapD(l.y - v.y, PH)) - LAMP_R - RAD));
+      a.stoppedGap = a.stoppedGap == null ? gap : Math.min(a.stoppedGap, gap);
+    }
+    if (goal) {
+      const gd = Math.hypot(wrapD(goal.x - v.x, PW), wrapD(goal.y - v.y, PH));
+      a.atGoalRun = gd < GOAL_R + RAD + 0.10 ? a.atGoalRun + DT : 0; a.atGoalMax = Math.max(a.atGoalMax, a.atGoalRun);
+    }
+    return a;
+  }
+  const cm = v => (v * 100).toFixed(1) + ' cm', s1 = v => v.toFixed(1) + ' s';
+  const hitsTxt = a => a.hits ? `${a.hits} hit${a.hits > 1 ? 's' : ''} ✗` : 'no hits';
+
+  // ----- the challenges -----
+  // check(a, r): a = live stats; r = { done, end, streak } for maze runs. Returns { pass, text }.
+  const LIST = [
+    { id: 'dead', title: 'Dead reckoning', world: 'maze', mode: 'open',
+      mission: 'Reach the goal of the classic maze using only a list of motor commands.',
+      setup: { maze: 'classic', sensor: { type: 'proximity', angle: 90 } }, start: { prog: [[0.2, 0.2, 1.5], [0.1, -0.1, 1.6]] },
+      hints: ['One square is 0.30 m. Driving at 0.20 m/s for 1.5 s covers one square.', 'Spinning with wheels at +0.10 and −0.10 m/s turns about 57° per second, so 90° takes about 1.57 s.'],
+      solution: { mode: 'open', prog: CLASSIC_PLAN },
+      check: (a, r) => r.done ? (r.end === 'goal' ? { pass: true, text: 'Reached the goal' } : { pass: false, text: 'Missed the goal' }) : { pass: false, text: 'Running…' } },
+    { id: 'weak', title: 'A weak motor', world: 'maze', mode: 'open',
+      mission: 'The left motor is 5% weaker than the right. Reach the goal 3 runs in a row.',
+      setup: { maze: 'classic', sensor: { type: 'proximity', angle: 90 }, problems: { mismatch: true } }, start: { prog: CLASSIC_PLAN },
+      hints: ['Run the plan and watch which way the robot drifts.', 'If one motor delivers 95% of what you ask for, what should you ask for so it delivers the original speed?'],
+      solution: { mode: 'open', prog: WEAK_LEFT_PLAN },
+      check: (a, r) => ({ pass: r.streak >= 3, text: `Goal streak ${Math.min(3, r.streak)} / 3` }) },
+    { id: 'bump', title: 'Bump and turn', world: 'maze', mode: 'react',
+      mission: 'Reach the goal of an Easy maze using only bump switches.',
+      setup: { maze: { diff: 'easy', seed: 7919 }, sensor: { type: 'bump', angle: 45 } },
+      hints: ['The Roomba preset bounces off walls but wanders. Can you make the robot keep one hand on a wall instead?', 'Try default speeds that curve gently toward the right wall, and a right-bump routine that steers away a little.'],
+      solution: { mode: 'react', react: BUMP_HUG },
+      check: (a, r) => r.done ? (r.end === 'goal' ? { pass: true, text: `Reached the goal in ${s1(a.t)}` } : { pass: false, text: 'Did not reach the goal' }) : { pass: false, text: `${s1(a.t)} · ${a.hits} bumps` } },
+    { id: 'hand', title: 'Hand on the wall', world: 'maze', mode: 'react',
+      mission: 'Reach the goal of a Medium maze (dead ends!) with proximity triggers and no wall hits.',
+      setup: { maze: { diff: 'medium', seed: 15838 }, sensor: { type: 'proximity', angle: 90 } },
+      hints: ['Keep your right hand on the wall: turn right whenever the right wall disappears, turn left when the way ahead is blocked.', 'After turning right into an opening, drive forward a little before checking again, or the robot will spin in circles.'],
+      solution: { mode: 'react', react: HAND_ON_WALL },
+      check: (a, r) => r.done ? ({ pass: r.end === 'goal' && a.hits === 0, text: r.end === 'goal' ? `Goal in ${s1(a.t)} · ${hitsTxt(a)}` : 'Did not reach the goal' }) : { pass: false, text: `${s1(a.t)} · ${hitsTxt(a)}` } },
+    { id: 'center', title: 'Center of the hallway', world: 'maze', mode: 'brait',
+      mission: 'Reach the goal of an Easy maze staying centered: average offset under 2.5 cm in straight hallways, no hits.',
+      setup: { maze: { diff: 'easy', seed: 23757 }, sensor: { type: 'proximity', angle: 90 } },
+      hints: ['Centered, each 90° side sensor reads 0.065 m. Use that as the setpoint.', 'If the left wall is too close, which wheel should speed up? Use opposite signs on the two gains in each side row.', 'A front row with a negative gain on both wheels slows the robot down before corners.'],
+      solution: { mode: 'brait', grid: CENTER },
+      check: (a, r) => { const off = a.offN ? a.offSum / a.offN : 0; return { pass: !!(r.done && r.end === 'goal' && a.hits === 0 && off < 0.025), text: `Offset ${cm(off)} · ${hitsTxt(a)}${r.done ? (r.end === 'goal' ? ' · goal' : ' · no goal') : ''}` }; } },
+    { id: 'hug', title: 'Hug the right wall', world: 'maze', mode: 'brait',
+      mission: 'Keep a 2 to 5 cm gap to the right wall for 20 s in total, before any wall hit.',
+      setup: { maze: { diff: 'easy', seed: 7919 }, sensor: { type: 'proximity', angle: 45 } },
+      hints: ['Use one row: the right sensor, steering the robot toward or away from the wall.', 'With 45° sensors, a 3.5 cm gap reads about 0.08 m. Angled sensors see the wall ahead, which keeps the robot from overshooting.', 'Add a front row that turns left when a wall is ahead.'],
+      solution: { mode: 'brait', grid: HUG },
+      check: (a) => ({ pass: a.band >= 20, text: `In the band ${s1(Math.min(20, a.band))} / 20 s${a.firstHitT != null ? ' · hit at ' + s1(a.firstHitT) : ''}` }) },
+    { id: 'fast', title: 'Fastest clean run', world: 'maze', mode: 'hybrid',
+      mission: 'Solve a Medium maze in under 80 s with no wall hits. Your best time is saved.',
+      setup: { maze: { diff: 'medium', seed: 15838 }, sensor: { type: 'proximity', angle: 90 } },
+      hints: ['Start from a wall follower that works (Hand on the wall), then speed it up.', 'Faster spins need shorter times: at ±0.20 m/s a 90° spin takes about 0.79 s.'],
+      solution: { mode: 'hybrid', grid: grid(false, 0.3, {}), react: FAST },
+      check: (a, r) => r.done ? ({ pass: r.end === 'goal' && a.hits === 0 && a.t < 80, text: r.end === 'goal' ? `Goal in ${s1(a.t)} · ${hitsTxt(a)}` : 'Did not reach the goal' }) : { pass: false, text: `${s1(a.t)} · ${hitsTxt(a)}` } },
+    { id: 'reverse', title: 'Back it up', world: 'maze', mode: 'react',
+      mission: 'Drive the whole Easy maze backward (95% of the distance or more), with no hits. The robot starts facing the wrong way.',
+      setup: { maze: { diff: 'easy', seed: 7919 }, sensor: { type: 'proximity', angle: 90 }, reverse: true },
+      hints: ['The robot cannot see where it is going, but the side sensors still notice when a hallway opens up.', 'Backing up, an opening on the robot’s right means the hallway turns to the robot’s right as it travels. Which way should it spin?', 'Driving backward flips steering: a wheel-speed difference that turns you left going forward turns your path the other way.'],
+      solution: { mode: 'react', react: REVERSE },
+      check: (a, r) => { const f = a.dist ? a.rev / a.dist : 1; return { pass: !!(r.done && r.end === 'goal' && a.hits === 0 && f >= 0.95), text: `Backward ${(f * 100).toFixed(0)}% · ${hitsTxt(a)}${r.done ? (r.end === 'goal' ? ' · goal' : ' · no goal') : ''}` }; } },
+    { id: 'robust', title: 'Survive the real world', world: 'maze', mode: 'brait',
+      mission: 'Reach the goal with no hits while motor mismatch, wheel slip, low battery, start error and sensor noise are all on.',
+      setup: { maze: { diff: 'easy', seed: 31676 }, sensor: { type: 'proximity', angle: 90 }, noise: true, problems: { mismatch: true, slip: true, battery: true, start: true } },
+      hints: ['Feedback controllers correct their own mistakes. Try your Center of the hallway controller here.', 'Every run is different now. A good controller passes again and again.'],
+      solution: { mode: 'brait', grid: CENTER },
+      check: (a, r) => r.done ? ({ pass: r.end === 'goal' && a.hits === 0, text: r.end === 'goal' ? `Goal in ${s1(a.t)} · ${hitsTxt(a)}` : 'Did not reach the goal' }) : { pass: false, text: `${s1(a.t)} · ${hitsTxt(a)}` } },
+    { id: 'fear', title: 'Fear', world: 'play', mode: 'brait',
+      mission: 'Roam for 60 s without touching anything, averaging at least 0.15 m/s.',
+      setup: { layout: 'four', sensor: { type: 'proximity', angle: 30 } },
+      hints: ['Fear: each sensor speeds up the wheel on its own side, so the robot turns away.', 'The Fear preset is safe but slow. What happens if you raise the base speed?'],
+      solution: { mode: 'brait', grid: grid(true, 0.15, { L: row(1.5, 0.12, 0), F: row(1.5, 0, 0), R: row(1.5, 0, 0.12) }) },
+      check: (a) => { const v = a.t ? a.dist / a.t : 0; return { pass: a.t >= 60 && a.hits === 0 && v >= 0.15, text: `${s1(Math.min(60, a.t))} / 60 s · avg ${v.toFixed(2)} m/s · ${hitsTxt(a)}` }; } },
+    { id: 'love', title: 'Love', world: 'play', mode: 'brait',
+      mission: 'Drive to the object and come to rest within 10 cm of it without touching.',
+      setup: { layout: 'one', sensor: { type: 'proximity', angle: 30 } },
+      hints: ['Love: negative gains slow the robot as it gets closer.', 'The robot stops where the base speed and the sensor terms cancel. Load the Love preset and adjust the front gain to move that point.'],
+      solution: { mode: 'brait', grid: grid(true, 0.22, { L: row(1.5, -0.10, 0), F: row(1.5, -0.15, -0.15), R: row(1.5, 0, -0.10) }) },
+      check: (a) => ({ pass: a.hits === 0 && a.stoppedGap != null && a.stoppedGap < 0.10, text: a.stoppedGap != null ? `Stopped ${cm(a.stoppedGap)} away · ${hitsTxt(a)}` : `Moving · ${hitsTxt(a)}` }) },
+    { id: 'touch', title: 'Touch every object', world: 'play', mode: 'hybrid',
+      mission: 'Touch all four objects.',
+      setup: { layout: 'four', sensor: { type: 'proximity', angle: 30 } },
+      hints: ['Aggression drives into objects, then gets stuck on the first one.', 'Add triggers that back away and turn once the robot touches something (a reading under 0.005 m).'],
+      solution: { mode: 'hybrid', grid: grid(true, 0.10, { L: row(1.5, 0, 0.12), F: row(1.5, 0.06, 0.06), R: row(1.5, 0.12, 0) }), react: BOUNCE },
+      check: (a) => ({ pass: a.lamps > 0 && a.touched.size >= a.lamps, text: `Touched ${a.touched.size} / ${a.lamps}` }) },
+    { id: 'goal', title: 'Around the obstacle', world: 'play', mode: 'brait',
+      mission: 'Reach the gold goal marker behind the object and stay there for 5 s, with no hits.',
+      setup: { layout: 'goalBehind', goal: true, sensor: { type: 'proximity', angle: 30 } },
+      hints: ['Use two behaviors at once: fear of objects (object rows) and love of the goal (goal rows).', 'Goal rows with negative same-side gains steer toward the goal and slow down near it.'],
+      solution: { mode: 'brait', grid: grid(true, 0.22, { L: row(1.5, 0.15, 0), F: row(1.5, 0.10, -0.05), R: row(1.5, 0, 0.15), GL: row(1.5, -0.10, 0), GF: row(1.5, -0.15, -0.15), GR: row(1.5, 0, -0.10) }) },
+      check: (a) => ({ pass: a.atGoalMax >= 5 && a.hits === 0, text: `At goal ${s1(Math.min(5, a.atGoalRun))} / 5 s · ${hitsTxt(a)}` }) },
+  ];
+  LIST.forEach((c, i) => { c.n = i + 1; });
+  return { LIST, byId: Object.fromEntries(LIST.map(c => [c.id, c])), blankGrid, blankReact, mazeAcc, advance, playAcc, playStep };
+})(typeof MR !== 'undefined' ? MR : require('./core.js'));
 
 
 </script>
@@ -656,7 +937,6 @@ const MR = (() => {
   const PRESETS = {
     slide: [[0.20, 0.20, 1.5], [0.10, -0.10, 1.6]],
     blank: [[0, 0, 1]],
-    solution: [[0.2,0.2,3.0],[0.1,-0.1,1.57],[0.2,0.2,4.5],[-0.1,0.1,1.57],[0.2,0.2,3.0],[0.1,-0.1,1.57],[0.2,0.2,4.5]],
   };
   const MODES = {
     open: { name: 'Open-loop', desc: 'Your list of motor commands, run exactly as written. The sensors are read but ignored.' },
@@ -671,23 +951,24 @@ const MR = (() => {
     bounce: { name: 'Aggression, then bounce off', grid: 'aggression', react: { default: [0.15, 0.15], interrupt: false, triggers: [
       tr('F', true, 'lt', 0.02, [[-0.15, -0.15, 0.5], [-0.125, 0.125, 1.26]]), tr('L', false, 'lt', 0.02, [[0.15, 0.05, 0.3]]), tr('R', false, 'lt', 0.02, [[0.05, 0.15, 0.3]]) ] } },
   };
-  const H0 = MR.HYBRID_PRESETS.wallcorner, PH0 = PLAY_HYBRID.lovedance;
+  const PH0 = PLAY_HYBRID.lovedance;
   const L0 = MR.PLAY_LAYOUTS.one;
   const S0 = {
     prog: PRESETS.slide.map(r => r.slice()), mode: 'open', world: 'maze', chartMode: 'lines', showCones: true,
+    mazeSpec: { kind: 'classic' }, reverseStart: false, challenge: null, done: {}, best: {}, solUsed: {}, snaps: {},
     sensors: { maze: { type: 'proximity', angle: 90, noise: false }, play: { type: 'proximity', angle: 30, noise: false } },
-    react: clone(MR.REACT_PRESETS.righthand), grid: clone(MR.GRID_PRESETS.fear),
-    hreact: clone(H0.react), hgrid: clone(MR.GRID_PRESETS[H0.grid]),
+    react: clone(MR.REACT_PRESETS.roomba), grid: clone(MR.GRID_PRESETS.fear),
+    hreact: CH.blankReact(false), hgrid: CH.blankGrid(false),
     pgrid: clone(MR.PLAY_GRID_PRESETS.love), phreact: clone(PH0.react), phgrid: clone(MR.PLAY_GRID_PRESETS[PH0.grid]),
     play: { lamps: L0.lamps.map(([x, y], i) => ({ x, y, id: i })), start: { x: L0.start[0], y: L0.start[1], th: L0.start[2] },
-      second: { on: false, preset: 'aggression', x: 3.2, y: 1.6, th: 3.5 }, goal: { on: false, x: 3.3, y: 1.4 } },
+      second: { on: false, preset: 'aggression', x: 3.6, y: 2.4, th: 3.5 }, goal: { on: false, x: 3.7, y: 2.1 } },
   };
   let st = clone(S0);
-  try { const s = JSON.parse(localStorage.getItem('mazeRunner4') || 'null'); if (s && s.v === 4) st = Object.assign(clone(S0), s.st); } catch (e) {}
+  try { const s = JSON.parse(localStorage.getItem('vehicles5') || 'null'); if (s && s.v === 5) st = Object.assign(clone(S0), s.st); } catch (e) {}
   // older saves: make sure the goal marker and the goal rows of the playground grids exist
   if (!st.play.goal) st.play.goal = clone(S0.play.goal);
   [st.pgrid, st.phgrid].forEach(G => MR.GSENS.forEach(k => { if (!G.rows[k]) G.rows[k] = { sp: MR.PRANGE, gL: 0, gR: 0 }; }));
-  const save = () => { try { localStorage.setItem('mazeRunner4', JSON.stringify({ v: 4, st })); } catch (e) {} };
+  const save = () => { try { localStorage.setItem('vehicles5', JSON.stringify({ v: 5, st })); } catch (e) {} };
   const sen = () => st.sensors[st.world];
   const isPlay = () => st.world === 'play';
   const goalObj = () => isPlay() && st.play.goal.on ? st.play.goal : null;
@@ -696,12 +977,38 @@ const MR = (() => {
   const gridPresets = () => isPlay() ? MR.PLAY_GRID_PRESETS : MR.GRID_PRESETS;
   const hybridPresets = () => isPlay() ? PLAY_HYBRID : MR.HYBRID_PRESETS;
   const rangeNow = () => isPlay() ? MR.PRANGE : RANGE;
-  let maze = MR.makeMaze(MR.CLASSIC.cells), mazeIsClassic = true;
+  const buildMaze = spec => spec.kind === 'classic' ? MR.makeMaze(MR.CLASSIC.cells) : MR.randomMaze(spec.diff, spec.seed);
+  let maze = buildMaze(st.mazeSpec);
   const problems = () => ({ mismatch: $('tMismatch').checked, slip: $('tSlip').checked, battery: $('tBattery').checked, lag: $('tLag').checked, start: $('tStart').checked });
   const activeReact = () => st.mode === 'hybrid' ? (isPlay() ? st.phreact : st.hreact) : st.react;
   const activeGrid = () => st.mode === 'hybrid' ? (isPlay() ? st.phgrid : st.hgrid) : (isPlay() ? st.pgrid : st.grid);
-  const cfg = extra => Object.assign({ mode: st.mode, program: st.prog, sensor: { ...sen() }, react: activeReact(), grid: activeGrid(), problems: {} }, extra || {});
+  const cfg = extra => Object.assign({ mode: st.mode, program: st.prog, sensor: { ...sen() }, react: activeReact(), grid: activeGrid(), problems: {}, reverseStart: !!st.reverseStart }, extra || {});
+
+  // ---------- slider: a range input with a zero mark, a colored fill and a value readout ----------
+  // o: { min, max, step, value, fill: 'sign' | css-var | 'none', fmt, label, onInput }
+  const dec = step => Math.max(0, -Math.floor(Math.log10(step) + 1e-9));
+  function slider(o) {
+    const el = document.createElement('div'); el.className = 'sl';
+    const d = o.digits != null ? o.digits : dec(o.step);
+    el.innerHTML = `<input type="range" min="${o.min}" max="${o.max}" step="${o.step}" value="${o.value}" aria-label="${esc(o.label || '')}"><output></output>`;
+    const inp = el.firstChild, out = el.lastChild;
+    const paint = () => {
+      const v = parseFloat(inp.value), p = (x) => ((x - o.min) / (o.max - o.min) * 100).toFixed(2) + '%';
+      const z = o.min < 0 && o.max > 0 ? 0 : o.min, a = p(Math.min(z, v)), b = p(Math.max(z, v));
+      const col = o.fill === 'sign' ? (v > 0 ? 'var(--good)' : v < 0 ? 'var(--bad)' : 'var(--line)') : o.fill === 'none' ? 'var(--line)' : `var(${o.fill || '--actual'})`;
+      let bg = `linear-gradient(90deg, var(--line) ${a}, ${col} ${a}, ${col} ${b}, var(--line) ${b})`;
+      if (o.min < 0 && o.max > 0) bg = `linear-gradient(90deg, transparent calc(${p(0)} - 1px), var(--muted) calc(${p(0)} - 1px), var(--muted) calc(${p(0)} + 1px), transparent calc(${p(0)} + 1px)), ` + bg;
+      inp.style.setProperty('--track', bg);
+      out.textContent = o.fmt ? o.fmt(v) : (v > 0 && o.min < 0 ? '+' : '') + v.toFixed(d);
+    };
+    inp.addEventListener('input', () => { paint(); o.onInput(parseFloat(inp.value)); });
+    paint();
+    el.set = v => { inp.value = v; paint(); };
+    return el;
+  }
+  const sp4 = (v) => (v > 0 ? '+' : '') + v.toFixed(3).replace(/0$/, '');
   let planned = null, cur = null, idx = 0, olds = [], playing = false, runs = 0, wins = 0;
+  let macc = null, pacc = null, streak = 0, runPassed = false, hintI = 0;
 
   // ---------- step tables (open-loop program and routines) ----------
   function describe([l, r, t]) {
@@ -717,12 +1024,12 @@ const MR = (() => {
     tbody.innerHTML = '';
     rows.forEach((row, i) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td class="n">${i + 1}</td>` +
-        ['L', 'R', 'T'].map((k, j) => `<td><input id="${idp}${i}${k}" type="number" inputmode="decimal" step="${j < 2 ? 0.01 : 0.05}" ${j < 2 ? 'min="-0.4" max="0.4"' : 'min="0"'} value="${row[j]}" aria-label="Step ${i + 1} ${['left speed', 'right speed', 'time'][j]}"></td>`).join('') +
+      tr.innerHTML = `<td class="n">${i + 1}</td><td></td><td></td>` +
+        `<td><input class="time" id="${idp}${i}T" type="number" inputmode="decimal" step="0.05" min="0" value="${row[2]}" aria-label="Step ${i + 1} time"></td>` +
         `<td class="does">${describe(row)}</td><td class="x"><button aria-label="Delete step ${i + 1}">✕</button></td>`;
-      tr.querySelectorAll('input').forEach((inp, j) => inp.addEventListener('input', () => {
-        row[j] = parseFloat(inp.value); tr.querySelector('.does').textContent = describe(row); onChange();
-      }));
+      [0, 1].forEach(j => tr.children[j + 1].appendChild(slider({ min: -VMAX, max: VMAX, step: 0.005, value: clampV(row[j]), fill: 'sign', fmt: sp4,
+        label: `Step ${i + 1} ${j ? 'right' : 'left'} speed`, onInput: v => { row[j] = v; tr.querySelector('.does').textContent = describe(row); onChange(); } })));
+      tr.querySelector('input.time').addEventListener('input', e => { row[2] = parseFloat(e.target.value); tr.querySelector('.does').textContent = describe(row); onChange(); });
       tr.querySelector('button').addEventListener('click', () => { if (rows.length > 1) { rows.splice(i, 1); stepTable(tbody, rows, idp, maxRows, onChange); onChange(); } });
       tbody.appendChild(tr);
     });
@@ -737,9 +1044,10 @@ const MR = (() => {
     box.innerHTML = '';
     const top = document.createElement('div'); top.className = 'tablefoot';
     const presets = hybrid ? hybridPresets() : MR.REACT_PRESETS;
-    top.innerHTML = `<p class="subhead">${hybrid ? 'Triggers (override the grid)' : 'Triggers'}</p><span class="spacer"></span><label class="hint" for="rPreset">Load</label>
-      <select id="rPreset"><option value="">Choose…</option>${Object.entries(presets).map(([k, p]) => `<option value="${k}">${esc(p.name)}</option>`).join('')}</select>`;
-    top.querySelector('select').addEventListener('change', e => {
+    const hasP = Object.keys(presets).length > 0;
+    top.innerHTML = `<p class="subhead">${hybrid ? 'Triggers (override the grid)' : 'Triggers'}</p><span class="spacer"></span>` + (hasP ? `<label class="hint" for="rPreset">Load</label>
+      <select id="rPreset"><option value="">Choose…</option>${Object.entries(presets).map(([k, p]) => `<option value="${k}">${esc(p.name)}</option>`).join('')}</select>` : '');
+    if (hasP) top.querySelector('select').addEventListener('change', e => {
       const k = e.target.value; if (!k) return;
       if (hybrid) { const R2 = clone(presets[k].react), G2 = clone(gridPresets()[presets[k].grid]); if (isPlay()) { st.phreact = R2; st.phgrid = G2; } else { st.hreact = R2; st.hgrid = G2; } renderGrid(); }
       else st.react = clone(presets[k]);
@@ -748,8 +1056,10 @@ const MR = (() => {
     box.appendChild(top);
     if (!hybrid) {
       const d = document.createElement('div'); d.className = 'defrow';
-      d.innerHTML = `<span><b>Default</b> (no trigger)</span><label>Left <input class="num" id="rDefL" type="number" step="0.01" min="-0.4" max="0.4" value="${R.default[0]}"></label><label>Right <input class="num" id="rDefR" type="number" step="0.01" min="-0.4" max="0.4" value="${R.default[1]}"></label><span class="hint">m/s</span>`;
-      d.querySelectorAll('input').forEach((inp, j) => inp.addEventListener('input', () => { R.default[j] = parseFloat(inp.value); changed(); }));
+      d.innerHTML = `<span><b>Default</b> (no trigger), m/s</span>`;
+      d.style.display = 'grid'; d.style.gridTemplateColumns = 'auto minmax(0,1fr) auto minmax(0,1fr)';
+      d.innerHTML = `<b style="grid-column:1/-1;font-size:14px">Default speeds when no trigger fires (m/s)</b><span class="hint">Left</span><span></span><span class="hint">Right</span><span></span>`;
+      [0, 1].forEach(j => d.children[2 + 2 * j].replaceWith(slider({ min: -VMAX, max: VMAX, step: 0.005, value: R.default[j], fill: 'sign', fmt: sp4, label: `Default ${j ? 'right' : 'left'} speed`, onInput: v => { R.default[j] = v; changed(true); } })));
       box.appendChild(d);
     }
     const it = document.createElement('label'); it.className = 'sw-inline';
@@ -759,17 +1069,17 @@ const MR = (() => {
     R.triggers.forEach((tr, i) => {
       const card = document.createElement('div'); card.className = 'trig' + (tr.on ? '' : ' off'); card.dataset.i = i;
       const condHtml = bump ? `<span>Fires while the ${SNAME[tr.s].toLowerCase()} bump switch is <b>pressed</b></span>`
-        : `<span>Fires when the reading is</span><select id="tc${i}"><option value="lt" ${tr.cond === 'lt' ? 'selected' : ''}>closer than</option><option value="gt" ${tr.cond === 'gt' ? 'selected' : ''}>farther than</option></select><input class="num" id="tt${i}" type="number" step="0.01" min="0" max="${rangeNow()}" value="${tr.th}"><span>m</span>`;
+        : `<span>Fires when the reading is</span><select id="tc${i}"><option value="lt" ${tr.cond === 'lt' ? 'selected' : ''}>closer than</option><option value="gt" ${tr.cond === 'gt' ? 'selected' : ''}>farther than</option></select><span class="thslot" style="flex:1;min-width:160px"></span><span>m</span>`;
       card.innerHTML = `<div class="trig-h"><span class="prio">${i + 1}</span><b>${SNAME[tr.s]} sensor</b>
           <label class="sw-inline"><input type="checkbox" id="ton${i}" ${tr.on ? 'checked' : ''}> On</label><span class="spacer"></span>
           <button class="mini" data-mv="-1" ${i === 0 ? 'disabled' : ''} aria-label="Check ${SNAME[tr.s]} earlier">↑</button><button class="mini" data-mv="1" ${i === R.triggers.length - 1 ? 'disabled' : ''} aria-label="Check ${SNAME[tr.s]} later">↓</button></div>
         <div class="cond">${condHtml}</div>
-        <div class="tablewrap"><table class="rt"><thead><tr><th>#</th><th>Left</th><th>Right</th><th>Time (s)</th><th>What it does</th><th></th></tr></thead><tbody></tbody></table></div>
+        <div class="tablewrap"><table class="rt"><thead><tr><th>#</th><th>Left (m/s)</th><th>Right (m/s)</th><th>Time (s)</th><th>What it does</th><th></th></tr></thead><tbody></tbody></table></div>
         <div><button class="mini" data-add>Add step</button></div>`;
       card.querySelector(`#ton${i}`).addEventListener('change', e => { tr.on = e.target.checked; card.classList.toggle('off', !tr.on); changed(); });
       if (!bump) {
         card.querySelector(`#tc${i}`).addEventListener('change', e => { tr.cond = e.target.value; changed(); });
-        card.querySelector(`#tt${i}`).addEventListener('input', e => { tr.th = parseFloat(e.target.value); changed(); });
+        card.querySelector('.thslot').appendChild(slider({ min: 0, max: rangeNow(), step: 0.005, value: Math.min(tr.th, rangeNow()), fill: SCOL[SENS.indexOf(tr.s)], label: `${SNAME[tr.s]} threshold`, onInput: v => { tr.th = v; changed(); } }));
       }
       card.querySelectorAll('[data-mv]').forEach(b => b.addEventListener('click', () => {
         const j = i + +b.dataset.mv; [R.triggers[i], R.triggers[j]] = [R.triggers[j], R.triggers[i]]; renderReact(); changed();
@@ -784,7 +1094,7 @@ const MR = (() => {
     const hint = document.createElement('p'); hint.className = 'hint';
     hint.textContent = bump ? 'Bump switches only report pressed or not, so there are no distances to set.'
       : isPlay() ? 'Each sensor sees the nearest object or vehicle inside a ±30° cone, up to 1.50 m away.'
-      : 'Centered in a hallway, a 90° side sensor reads 0.075 m and a 45° one reads 0.137 m. “Farther than” catches an opening, such as the right wall ending at a corner.';
+      : `Centered in a hallway, a 90° side sensor reads 0.065 m and a 45° one reads 0.123 m. “Farther than” catches an opening, such as the right wall ending at a corner.`;
     box.appendChild(hint);
   }
   function markActiveTrigger(info) {
@@ -802,25 +1112,23 @@ const MR = (() => {
     if (sel) sel.addEventListener('change', e => { const k = e.target.value; if (!k) return; if (isPlay()) st.pgrid = clone(gridPresets()[k]); else st.grid = clone(gridPresets()[k]); renderGrid(); changed(); });
     box.appendChild(top);
     const wrap = document.createElement('div'); wrap.className = 'tablewrap';
-    wrap.innerHTML = `<table class="ggrid"><thead><tr><th>Sensor</th><th>Setpoint (m)</th><th>Gain to left motor (1/s)</th><th>Gain to right motor (1/s)</th></tr></thead><tbody>
-      <tr><td><b>Base speed</b></td><td></td><td><input id="gBase" type="number" step="0.01" min="-0.4" max="0.4" value="${G.base}" aria-label="Base speed"><span class="contrib">m/s</span></td><td><span class="contrib" id="gBaseR">same</span></td></tr>
-      ${SENS.map(k => `<tr><td>${SNAME[k]}</td>
-        <td><input id="gsp${k}" type="number" step="0.005" min="0" max="${rangeNow()}" value="${G.rows[k].sp}" ${bump ? 'disabled' : ''} aria-label="${SNAME[k]} setpoint"><span class="contrib">${bump ? '1 if pressed' : ''}</span></td>
-        <td><input id="ggL${k}" type="number" step="0.05" value="${G.rows[k].gL}" aria-label="${SNAME[k]} gain to left motor"><span class="contrib" id="cL${k}"></span></td>
-        <td><input id="ggR${k}" type="number" step="0.05" value="${G.rows[k].gR}" aria-label="${SNAME[k]} gain to right motor"><span class="contrib" id="cR${k}"></span></td></tr>`).join('')}
-      ${goalRows(G) ? MR.GSENS.map(k => `<tr class="goalrow"><td><span class="gdot"></span>${GNAME[k]}</td>
-        <td><input id="gsp${k}" type="number" step="0.005" min="0" max="${MR.PRANGE}" value="${G.rows[k].sp}" aria-label="${GNAME[k]} setpoint"><span class="contrib"></span></td>
-        <td><input id="ggL${k}" type="number" step="0.05" value="${G.rows[k].gL}" aria-label="${GNAME[k]} gain to left motor"><span class="contrib" id="cL${k}"></span></td>
-        <td><input id="ggR${k}" type="number" step="0.05" value="${G.rows[k].gR}" aria-label="${GNAME[k]} gain to right motor"><span class="contrib" id="cR${k}"></span></td></tr>`).join('') : ''}
+    const P = isPlay(), GMAX = P ? 0.30 : 1.0, GSTEP = P ? 0.01 : 0.05, SPSTEP = P ? 0.01 : 0.001, RNG = rangeNow();
+    const keys = SENS.concat(goalRows(G) ? MR.GSENS : []), nm = k => SNAME[k] || GNAME[k];
+    const ends = (a, b) => `<div class="ends"><span>${a}</span><span>${b}</span></div>`;
+    wrap.innerHTML = `<table class="ggrid"><thead><tr><th>Sensor</th><th>Setpoint (m)${bump ? '' : ends(0, RNG.toFixed(2))}</th><th>Gain → left motor${ends('−' + GMAX.toFixed(2), '+' + GMAX.toFixed(2))}</th><th>Gain → right motor${ends('−' + GMAX.toFixed(2), '+' + GMAX.toFixed(2))}</th></tr></thead><tbody>
+      <tr><td><b>Base</b></td><td class="hint">speed of both wheels (m/s)</td><td id="gBaseSlot"></td><td><span class="contrib" id="gBaseR">same</span></td></tr>
+      ${keys.map(k => `<tr class="${k[0] === 'G' && k.length === 2 ? 'goalrow' : ''}"><td>${k.length === 2 ? '<span class="gdot"></span>' : ''}${nm(k)}</td>
+        <td data-sp="${k}">${bump && k.length === 1 ? '<span class="hint">1 if pressed</span>' : ''}</td>
+        <td data-gl="${k}"><span class="contrib" id="cL${k}"></span></td>
+        <td data-gr="${k}"><span class="contrib" id="cR${k}"></span></td></tr>`).join('')}
       <tr class="total"><td>Wheel speed</td><td></td><td><span class="contrib" id="tL">–</span></td><td><span class="contrib" id="tR">–</span></td></tr>
       </tbody></table>`;
     box.appendChild(wrap);
-    const signCls = inp => { const v = parseFloat(inp.value); inp.classList.toggle('pos', v > 0); inp.classList.toggle('neg', v < 0); };
-    wrap.querySelector('#gBase').addEventListener('input', e => { G.base = parseFloat(e.target.value) || 0; changed(true); });
-    SENS.concat(goalRows(G) ? MR.GSENS : []).forEach(k => {
-      const sp = wrap.querySelector('#gsp' + k), gl = wrap.querySelector('#ggL' + k), gr = wrap.querySelector('#ggR' + k);
-      sp.addEventListener('input', () => { G.rows[k].sp = parseFloat(sp.value) || 0; changed(true); });
-      [gl, gr].forEach((inp, j) => { signCls(inp); inp.addEventListener('input', () => { G.rows[k][j ? 'gR' : 'gL'] = parseFloat(inp.value) || 0; signCls(inp); changed(true); }); });
+    wrap.querySelector('#gBaseSlot').appendChild(slider({ min: -VMAX, max: VMAX, step: 0.01, value: G.base, fill: '--ink', fmt: sp4, label: 'Base speed', onInput: v => { G.base = v; changed(true); } }));
+    keys.forEach((k, i) => {
+      const col = k.length === 2 ? '--goal' : SCOL[SENS.indexOf(k)];
+      if (!(bump && k.length === 1)) wrap.querySelector(`[data-sp="${k}"]`).appendChild(slider({ min: 0, max: k.length === 2 ? MR.PRANGE : RNG, step: SPSTEP, value: Math.min(G.rows[k].sp, k.length === 2 ? MR.PRANGE : RNG), fill: col, label: nm(k) + ' setpoint', onInput: v => { G.rows[k].sp = v; changed(true); } }));
+      ['gL', 'gR'].forEach(g => { const td = wrap.querySelector(`[data-${g.toLowerCase()}="${k}"]`); td.insertBefore(slider({ min: -GMAX, max: GMAX, step: GSTEP, value: Math.max(-GMAX, Math.min(GMAX, G.rows[k][g])), fill: 'sign', fmt: v => (v > 0 ? '+' : '') + v.toFixed(2), label: `${nm(k)} gain to ${g === 'gL' ? 'left' : 'right'} motor`, onInput: v => { G.rows[k][g] = v; changed(true); } }), td.firstChild); });
     });
     const f = document.createElement('div'); f.className = 'formula';
     f.textContent = bump ? 'left wheel = base + Σ (gain to left) × (1 if pressed, else 0); the right wheel uses the gains to the right motor' : 'left wheel = base + Σ (gain to left) × (setpoint − reading); the right wheel uses the gains to the right motor';
@@ -859,23 +1167,25 @@ const MR = (() => {
     $('reactPanel').hidden = !(st.mode === 'react' || st.mode === 'hybrid');
     $('gridPanel').hidden = !(st.mode === 'brait' || st.mode === 'hybrid');
     let n = '';
-    if (st.mode === 'open' && !mazeIsClassic) n = 'This is a new maze. A program written for the classic maze will not know about it.';
-    else if (st.mode === 'brait' && sen().angle === 45 && Math.abs(activeGrid().rows.R.sp - 0.075) < 1e-6) n = 'Your side setpoints are 0.075 m, the centered reading for 90° sensors. With 45° sensors, centered reads 0.137 m.';
+    if (st.mode === 'open' && st.mazeSpec.kind !== 'classic' && !isPlay()) n = 'This is a new maze. A program written for the classic maze will not know about it.';
+    else if (!isPlay() && st.mode === 'brait' && sen().angle !== 90 && Math.abs(activeGrid().rows.R.sp - 0.065) < 1e-6) n = `Your side setpoints are 0.065 m, the centered reading for 90° sensors. With ${sen().angle}° sensors, centered reads ${MR.sideTarget(sen().angle).toFixed(3)} m.`;
     const note = $('modeNote'); note.textContent = n; note.hidden = !n;
     $('sensorHint').textContent = sen().type === 'bump'
       ? 'Bump switches trigger just before the body touches a wall. Each press nudges the robot’s heading a little.'
-      : 'Readings are distances from the robot’s edge to the nearest wall, up to 0.40 m. Centered in a hallway, a 90° side sensor reads 0.075 m.';
-    $('mazeName').textContent = mazeIsClassic ? 'Classic maze (from the slides)' : 'Random maze';
+      : 'Readings are distances from the robot’s edge to the nearest wall, up to 0.40 m. Hallways are 0.28 m wide between walls, so centered, a 90° side sensor reads 0.065 m.';
+    $('mazeName').textContent = st.mazeSpec.kind === 'classic' ? 'Classic maze (from the slides)' : `${{ easy: 'Easy', medium: 'Medium', hard: 'Hard' }[st.mazeSpec.diff]} maze #${st.mazeSpec.seed}`;
+    document.querySelectorAll('#diff button').forEach(b => b.setAttribute('aria-pressed', st.mazeSpec.kind !== 'classic' && b.dataset.d === st.mazeSpec.diff));
+    $('revStart').checked = !!st.reverseStart;
     const P = isPlay();
     document.querySelectorAll('#worlds button').forEach(b => b.setAttribute('aria-pressed', b.dataset.w === st.world));
-    $('worldHint').textContent = P ? '4 m × 2 m, edges wrap around' : '';
+    $('diff').hidden = P; $('diffLabel').textContent = P ? '4.5 × 3 m, edges wrap' : 'Maze';
     $('mazeRow').hidden = P; $('playRow').hidden = !P; $('playHelp').hidden = !P; $('clear').hidden = P;
     $('second').checked = !!st.play.second.on; $('secondPreset').hidden = !(P && st.play.second.on);
     const GO = !!goalObj();
     $('goalOn').checked = !!st.play.goal.on;
-    $('lDist').textContent = P ? (GO ? 'Time at goal' : 'Time near an object') : 'Distance from goal';
-    $('lHits').textContent = P ? 'Object hits' : 'Wall hits';
-    $('lRuns').textContent = P ? (GO ? 'First reached goal' : 'Objects visited') : 'Runs reaching goal';
+    $('lDist').textContent = P ? (GO ? 'At goal' : 'Near objects') : 'To goal';
+    $('lHits').textContent = 'Hits';
+    $('lRuns').textContent = P ? (GO ? 'First at goal' : 'Visited') : 'Goal runs';
     $('rangeFact').textContent = rangeNow().toFixed(2) + ' m';
     cv.classList.toggle('edit', P);
     if (P && sen().type !== 'bump') $('sensorHint').textContent = 'Each sensor reports the distance to the nearest object or vehicle inside a ±30° cone around where it points, up to 1.50 m. Like a real sensor, it is less sensitive near the edge of its cone, so objects there read as farther away. Sensors see across the wrapped edges.';
@@ -891,17 +1201,17 @@ const MR = (() => {
   function stopRun() { playing = false; $('run').disabled = false; $('run').textContent = isPlay() ? (pv ? 'Resume' : 'Play') : 'Run'; }
   function resetRuns() { stopRun(); cur = null; idx = 0; olds = []; runs = 0; wins = 0; }
   function changed(soft) {
-    save();
-    if (isPlay()) { planned = null; if (pv) pv.forEach(rebuildVehicle); syncUI(); setStatus(); draw(); renderCode(); return; }
+    save(); streak = 0;
+    if (isPlay()) { planned = null; if (pv) pv.forEach(rebuildVehicle); syncUI(); setStatus(); draw(); renderCode(); updateChallenge(); return; }
     planned = st.mode === 'open' ? MR.simulate(maze, cfg()) : null;
     if (cur && !playing) { olds.push(cur.pts); if (olds.length > 8) olds.shift(); }
     if (!playing || !soft) { stopRun(); cur = null; idx = 0; }
-    syncUI(); setStatus(); draw(); renderCode();
+    syncUI(); setStatus(); draw(); renderCode(); updateChallenge();
   }
 
   // ---------- drawing ----------
   const cv = $('maze'), ctx = cv.getContext('2d');
-  const PAD = 34; let S = 1, dpr = 1;
+  const PAD = 24; let S = 1, dpr = 1;
   function size() {
     const w = cv.clientWidth || 700; dpr = window.devicePixelRatio || 1;
     S = (w - 2 * PAD) / worldW();
@@ -954,28 +1264,31 @@ const MR = (() => {
   }
   function restPose() {
     const s0 = MR.center(maze, maze.start[0], maze.start[1]);
-    return { x: s0.x, y: s0.y, th: maze.startTh, S: MR.sense(maze, s0.x, s0.y, maze.startTh, { ...sen(), noise: false }) };
+    const th = maze.startTh + (st.reverseStart ? Math.PI : 0);
+    return { x: s0.x, y: s0.y, th, S: MR.sense(maze, s0.x, s0.y, th, { ...sen(), noise: false }) };
   }
   function draw() {
     if (isPlay()) { drawPlay(); drawCharts(); return; }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cv.width / dpr, cv.height / dpr);
-    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-      const open = maze.open[r * COLS + c], x = X(c * CELL), y = Y((ROWS - r) * CELL);
-      ctx.fillStyle = open ? css('--floor') : css('--wall'); ctx.fillRect(x, y, CELL * S + .5, CELL * S + .5);
-      if (open) { ctx.strokeStyle = css('--floorgrid'); ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, CELL * S - 1, CELL * S - 1); }
-    }
+    ctx.fillStyle = css('--floor'); ctx.fillRect(X(0), Y(MR.MH), MR.MW * S, MR.MH * S);
+    ctx.strokeStyle = css('--floorgrid'); ctx.lineWidth = 1; ctx.beginPath();
+    for (let c = 1; c < COLS; c++) { ctx.moveTo(Math.round(X(c * CELL)) + .5, Y(MR.MH)); ctx.lineTo(Math.round(X(c * CELL)) + .5, Y(0)); }
+    for (let r = 1; r < ROWS; r++) { ctx.moveTo(X(0), Math.round(Y(r * CELL)) + .5); ctx.lineTo(X(MR.MW), Math.round(Y(r * CELL)) + .5); }
+    ctx.stroke();
+    const tint = (c, r, col) => { const p = MR.center(maze, c, r); ctx.fillStyle = col; ctx.globalAlpha = .16; ctx.fillRect(X(p.x - CELL / 2), Y(p.y + CELL / 2), CELL * S, CELL * S); ctx.globalAlpha = 1; };
+    tint(maze.start[0], maze.start[1], css('--planned')); tint(maze.goal[0], maze.goal[1], css('--actual'));
+    ctx.fillStyle = css('--wall');
+    maze.rects.forEach(q => { const x0 = Math.max(0, q[0]), y0 = Math.max(0, q[1]), x1 = Math.min(MR.MW, q[2]), y1 = Math.min(MR.MH, q[3]); ctx.fillRect(X(x0), Y(y1), (x1 - x0) * S, (y1 - y0) * S); });
     const g = MR.center(maze, maze.goal[0], maze.goal[1]);
     star(X(g.x), Y(g.y), CELL * S * .3, css('--actual'));
-    ctx.font = '600 13px ' + css('--f-body'); ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
-    const lab = (t, c, r, col) => { const p = MR.center(maze, c, r); ctx.fillStyle = col;
-      ctx.fillText(t, X(p.x), r === ROWS - 1 ? Y(0) + 12 : r === 0 ? Y(ROWS * CELL) - 12 : Y(p.y) - CELL * S * .38); };
-    lab('Start', maze.start[0], maze.start[1], css('--planned'));
-    lab('Goal', maze.goal[0], maze.goal[1], css('--actual'));
+    const s0 = MR.center(maze, maze.start[0], maze.start[1]);
+    ctx.font = '600 11px ' + css('--f-body'); ctx.textBaseline = 'top'; ctx.textAlign = 'center'; ctx.fillStyle = css('--planned');
+    ctx.fillText('Start', X(s0.x), Y(0) + 4);
     ctx.textAlign = 'left';
     ctx.strokeStyle = css('--muted'); ctx.lineWidth = 2; const sbx = X(COLS * CELL) - CELL * S, sby = Y(0) + 16;
     ctx.beginPath(); ctx.moveTo(sbx, sby); ctx.lineTo(sbx + CELL * S, sby); ctx.moveTo(sbx, sby - 4); ctx.lineTo(sbx, sby + 4); ctx.moveTo(sbx + CELL * S, sby - 4); ctx.lineTo(sbx + CELL * S, sby + 4); ctx.stroke();
-    ctx.fillStyle = css('--muted'); ctx.font = '12px ' + css('--f-body'); ctx.textAlign = 'right'; ctx.fillText('0.30 m', sbx - 6, sby); ctx.textAlign = 'left';
+    ctx.fillStyle = css('--muted'); ctx.font = '12px ' + css('--f-body'); ctx.textAlign = 'right'; ctx.textBaseline = 'middle'; ctx.fillText('0.30 m', sbx - 6, sby); ctx.textAlign = 'left';
 
     olds.forEach(o => path(o, css('--actual-soft'), 2.5));
     if (planned) path(planned.pts, css('--planned'), 2.5, [7, 6]);
@@ -1045,9 +1358,9 @@ const MR = (() => {
     const dtw = last ? (ts - last) / 1000 : 0; last = ts;
     idx = Math.min(cur.pts.length - 1, idx + Math.max(1, Math.round(dtw * +$('speed').value / DT)));
     if (st.mode === 'open') highlight(cur.pts[idx].step);
-    setStatus(false); draw();
+    setStatus(false); draw(); updateChallenge();
     if (idx >= cur.pts.length - 1) {
-      playing = false; runs++; if (cur.end.type === 'goal') wins++;
+      playing = false; runs++; if (cur.end.type === 'goal') { wins++; streak++; } else streak = 0; updateChallenge(true);
       setStatus(true); highlight(-1); $('run').disabled = false; $('run').textContent = 'Run again'; draw(); return;
     }
     requestAnimationFrame(tick);
@@ -1057,6 +1370,7 @@ const MR = (() => {
     if (playing) return;
     if (cur) { olds.push(cur.pts); if (olds.length > 8) olds.shift(); }
     cur = MR.simulate(maze, cfg({ problems: problems() })); idx = 0; last = 0; playing = true; $('run').disabled = true;
+    macc = CH.mazeAcc(maze); runPassed = false;
     requestAnimationFrame(tick);
   });
   $('reset').addEventListener('click', () => { if (isPlay()) { resetPlay(); return; } changed(); });
@@ -1071,8 +1385,12 @@ const MR = (() => {
   $('sNoise').addEventListener('change', () => { setBoth('noise', $('sNoise').checked); runs = 0; wins = 0; changed(true); });
   $('noiseAmt').addEventListener('input', () => { setBoth('noiseAmt', parseFloat($('noiseAmt').value)); changed(true); });
   document.querySelectorAll('.tog input[id^="t"]').forEach(i => i.addEventListener('change', () => { runs = 0; wins = 0; if (pv) pv.forEach(v => { v.cfg.problems = problems(); }); setStatus(!!cur && !playing); }));
-  $('newMaze').addEventListener('click', () => { maze = MR.randomMaze(); mazeIsClassic = false; resetRuns(); changed(); });
-  $('classic').addEventListener('click', () => { maze = MR.makeMaze(MR.CLASSIC.cells); mazeIsClassic = true; resetRuns(); changed(); });
+  function setMaze(spec) { st.mazeSpec = spec; maze = buildMaze(spec); resetRuns(); changed(); }
+  const newSeed = () => 1 + Math.floor(Math.random() * 99999);
+  $('newMaze').addEventListener('click', () => setMaze({ kind: 'random', diff: st.mazeSpec.diff || 'easy', seed: newSeed() }));
+  $('classic').addEventListener('click', () => setMaze({ kind: 'classic' }));
+  document.querySelectorAll('#diff button').forEach(b => b.addEventListener('click', () => setMaze({ kind: 'random', diff: b.dataset.d, seed: newSeed() })));
+  $('revStart').addEventListener('change', e => { st.reverseStart = e.target.checked; resetRuns(); changed(); });
 
   // ---------- Live readings: two stacked real-time graphs ----------
   const WIN = 10;                       // seconds shown
@@ -1253,12 +1571,12 @@ const MR = (() => {
     return lampList().map((l, k) => ({ x: l.x, y: l.y, r: MR.LAMP_R, id: 'lamp' + k })).concat(ps.filter(p => p.i !== i).map(p => ({ x: p.x, y: p.y, r: RAD, id: 'veh' + p.i })));
   }
   function resetPlay(silent) {
-    playing = false; pv = null; ptrail = []; pt = 0; phist = [];
+    playing = false; pv = null; ptrail = []; pt = 0; phist = []; pacc = null;
     if (!silent) { stopRun(); setStatus(); draw(); }
   }
   function togglePlay() {
     if (playing) { playing = false; $('run').textContent = 'Resume'; setStatus(); draw(); return; }
-    if (!pv) { pv = makePV(); ptrail = pv.map(() => []); pt = 0; }
+    if (!pv) { pv = makePV(); ptrail = pv.map(() => []); pt = 0; pacc = CH.playAcc(); runPassed = false; }
     playing = true; lastP = 0; $('run').textContent = 'Pause'; requestAnimationFrame(playTick);
   }
   function playTick(ts) {
@@ -1267,12 +1585,13 @@ const MR = (() => {
     const n = Math.min(800, Math.max(1, Math.round(dtw * +$('speed').value / DT)));
     for (let k = 0; k < n; k++) {
       pv.forEach((v, i) => MR.stepPlay(v, lampList(), pv.filter((_, j) => j !== i), goalObj()));
+      if (pacc) CH.playStep(pacc, pv[0], lampList(), goalObj());
       pt += DT;
       if (Math.round(pt / DT) % 3 === 0) { pv.forEach((v, i) => ptrail[i].push({ x: v.x, y: v.y, t: pt })); phist.push(sample({ t: pv[0].t, S: pv[0].S, cmd: pv[0].cmd })); }
     }
     ptrail.forEach(tr => { while (tr.length && pt - tr[0].t > 20) tr.shift(); });
     while (phist.length && pt - phist[0].t > WIN + 0.5) phist.shift();
-    setStatus(); draw();
+    setStatus(); draw(); updateChallenge();
     requestAnimationFrame(playTick);
   }
   function playStatus() {
@@ -1443,7 +1762,7 @@ const MR = (() => {
       const L = MR.PLAY_LAYOUTS[key];
       st.play.lamps = L.lamps.map(([x, y], i) => ({ x, y, id: i }));
       st.play.start = { x: L.start[0], y: L.start[1], th: L.start[2] };
-      if (L.goal) { st.play.goal = { on: true, x: L.goal[0], y: L.goal[1] }; if (st.mode === 'brait') st.pgrid = clone(MR.PLAY_GRID_PRESETS.goalLove); }
+      if (L.goal) st.play.goal = { on: true, x: L.goal[0], y: L.goal[1] };
     }
     resetPlay(); save(); renderGrid(); syncUI(); setStatus(); draw();
   }
@@ -1602,11 +1921,97 @@ ${triggerChain(R, gridBody(G, '    '))}  delay(10);
     try { navigator.clipboard.writeText(txt).then(ok, fallback); } catch (e) { fallback(); }
   });
 
+  // ---------- challenges ----------
+  const SNAP_KEYS = ['world', 'mode', 'mazeSpec', 'reverseStart', 'sensors', 'prog', 'react', 'grid', 'hreact', 'hgrid', 'pgrid', 'phreact', 'phgrid', 'play'];
+  const PROB = { mismatch: 'tMismatch', slip: 'tSlip', battery: 'tBattery', lag: 'tLag', start: 'tStart' };
+  function snap() { const o = {}; SNAP_KEYS.forEach(k => { o[k] = clone(st[k]); }); o.problems = problems(); return o; }
+  function setProblems(p) { Object.entries(PROB).forEach(([k, id]) => { $(id).checked = !!(p && p[k]); }); }
+  function applySetup(ch) {
+    const S = ch.setup, play = ch.world === 'play';
+    st.world = ch.world; st.mode = ch.mode;
+    st.sensors[ch.world] = Object.assign({ type: 'proximity', angle: 90, noise: false, noiseAmt: 0.006 }, S.sensor, { noise: !!S.noise });
+    st.react = CH.blankReact(play);
+    if (play) {
+      const L = MR.PLAY_LAYOUTS[S.layout];
+      st.play.lamps = L.lamps.map(([x, y], i) => ({ x, y, id: i }));
+      st.play.start = { x: L.start[0], y: L.start[1], th: L.start[2] };
+      st.play.goal = { on: !!S.goal, x: L.goal ? L.goal[0] : st.play.goal.x, y: L.goal ? L.goal[1] : st.play.goal.y };
+      st.play.second.on = false;
+      st.pgrid = CH.blankGrid(true); st.phgrid = CH.blankGrid(true); st.phreact = CH.blankReact(true);
+    } else {
+      st.mazeSpec = S.maze === 'classic' ? { kind: 'classic' } : { kind: 'random', diff: S.maze.diff, seed: S.maze.seed };
+      st.reverseStart = !!S.reverse;
+      st.prog = clone((ch.start && ch.start.prog) || [[0.2, 0.2, 1.0]]);
+      st.grid = CH.blankGrid(false); st.hgrid = CH.blankGrid(false); st.hreact = CH.blankReact(false);
+    }
+    setProblems(S.problems);
+  }
+  function selectChallenge(id) {
+    st.snaps[st.challenge || 'free'] = snap();
+    st.challenge = id || null; hintI = 0; $('hintBox').hidden = true; $('hintBtn').textContent = 'Hint';
+    const sn = st.snaps[id || 'free'];
+    if (sn) { SNAP_KEYS.forEach(k => { if (sn[k] !== undefined) st[k] = clone(sn[k]); }); setProblems(sn.problems); }
+    else if (id) applySetup(CH.byId[id]);
+    maze = buildMaze(st.mazeSpec); streak = 0;
+    resetRuns(); resetPlay(true); renderProg(); rerenderPanels(); size(); changed(); renderChalSel(); updateChallenge();
+  }
+  function loadSolution() {
+    const ch = CH.byId[st.challenge]; if (!ch) return;
+    const so = ch.solution, play = ch.world === 'play';
+    st.solUsed[ch.id] = true; st.mode = so.mode;
+    if (so.prog) st.prog = clone(so.prog);
+    if (so.mode === 'react') st.react = clone(so.react);
+    if (so.mode === 'brait') { if (play) st.pgrid = clone(so.grid); else st.grid = clone(so.grid); }
+    if (so.mode === 'hybrid') { if (play) { st.phgrid = clone(so.grid); st.phreact = clone(so.react); } else { st.hgrid = clone(so.grid); st.hreact = clone(so.react); } }
+    resetRuns(); resetPlay(true); renderProg(); rerenderPanels(); changed();
+    $('hintBox').textContent = 'Solution loaded. Press ' + (play ? 'Play' : 'Run') + ' to watch it, then try changing it.'; $('hintBox').hidden = false;
+  }
+  function renderChalSel() {
+    const sel = $('chalSel'), mark = id => st.done[id] === 'pass' ? ' ✓' : st.done[id] === 'sol' ? ' (with solution)' : '';
+    const grp = (w, label) => `<optgroup label="${label}">${CH.LIST.filter(c => c.world === w).map(c => `<option value="${c.id}">${c.n}. ${esc(c.title)}${mark(c.id)}</option>`).join('')}</optgroup>`;
+    sel.innerHTML = `<option value="">Free play</option>` + grp('maze', 'Maze') + grp('play', 'Playground');
+    sel.value = st.challenge || '';
+    const n = CH.LIST.filter(c => st.done[c.id] === 'pass').length;
+    $('chalCount').textContent = `${n} of ${CH.LIST.length} done`;
+  }
+  function markPass(ch, a) {
+    if (st.done[ch.id] !== 'pass') st.done[ch.id] = st.solUsed[ch.id] ? 'sol' : 'pass';
+    if (ch.id === 'fast' && a) st.best.fast = Math.min(st.best.fast || Infinity, a.t);
+    save(); renderChalSel();
+  }
+  function updateChallenge(final) {
+    const ch = CH.byId[st.challenge], box = $('mission');
+    $('hintBtn').hidden = $('solBtn').hidden = !ch;
+    if (!ch) {
+      $('misTitle').textContent = 'Free play:'; $('misText').textContent = 'build any controller you like. Pick a challenge at the top to get a mission.';
+      $('misStatus').textContent = ''; box.classList.remove('pass'); return;
+    }
+    $('misTitle').textContent = `${ch.n}. ${ch.title}:`; $('misText').textContent = ch.mission;
+    let res = null;
+    if (ch.world !== st.world) res = { pass: false, text: `Switch to the ${ch.world === 'play' ? 'Playground' : 'Maze'} for this one` };
+    else if (ch.world === 'maze') {
+      if (cur && macc) { CH.advance(macc, cur.pts, Math.min(idx, cur.pts.length - 1)); res = ch.check(macc, { done: !playing && idx >= cur.pts.length - 1, end: cur.end.type, streak }); }
+      else res = { pass: false, text: ch.id === 'weak' ? `Goal streak ${Math.min(3, streak)} / 3 · press Run` : 'Press Run' };
+    } else res = pacc ? ch.check(pacc) : { pass: false, text: 'Press Play' };
+    if (res.pass && !runPassed) { runPassed = true; markPass(ch, ch.world === 'maze' ? macc : pacc); }
+    const best = ch.id === 'fast' && st.best.fast ? ` · best ${st.best.fast.toFixed(1)} s` : '';
+    $('misStatus').textContent = (res.pass ? '✓ Passed · ' : '') + res.text + best;
+    box.classList.toggle('pass', !!res.pass);
+  }
+  $('chalSel').addEventListener('change', e => selectChallenge(e.target.value));
+  $('solBtn').addEventListener('click', loadSolution);
+  $('hintBtn').addEventListener('click', () => {
+    const ch = CH.byId[st.challenge]; if (!ch) return;
+    const h = ch.hints[hintI % ch.hints.length];
+    $('hintBox').textContent = `Hint ${hintI % ch.hints.length + 1} of ${ch.hints.length}: ${h}`; $('hintBox').hidden = false; hintI++;
+    $('hintBtn').textContent = hintI >= ch.hints.length ? 'Hint (again)' : 'Next hint';
+  });
+
   // ---------- boot ----------
   window.addEventListener('resize', () => { size(); draw(); });
   if (window.matchMedia) { const mq = window.matchMedia('(prefers-color-scheme: dark)'); mq.addEventListener && mq.addEventListener('change', draw); }
   new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  renderProg(); rerenderPanels(); size(); changed();
+  renderProg(); rerenderPanels(); size(); changed(); renderChalSel(); updateChallenge();
   if (document.fonts) document.fonts.ready.then(() => { size(); draw(); });
 })();
 
