@@ -158,9 +158,15 @@ body { padding: 0 0 28px; }
 .topbar .seg button { padding: 5px 10px; }
 .main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 0 18px; align-items: start; }
 .side { display: grid; gap: 12px; min-width: 0; }
-.arena { position: sticky; top: 8px; }
+.leftcol { display: grid; gap: 12px; min-width: 0; position: sticky; top: 8px; }
+.chal { padding: 8px 12px; gap: 6px; }
+.chal select { font-weight: 600; padding: 6px 10px; flex: 1 1 180px; min-width: 0; max-width: 360px; }
+.chalrow { flex-wrap: nowrap; }
+.chalrow #chalCount { white-space: nowrap; }
+@media (max-width: 560px) { .chalrow { flex-wrap: wrap; } }
+.chal .mission[hidden] { display: none; }
 .below { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding: 0 18px; align-items: start; }
-@media (max-width: 1000px) { .main, .below { grid-template-columns: minmax(0, 1fr); } .arena { position: static; } }
+@media (max-width: 1000px) { .main, .below { grid-template-columns: minmax(0, 1fr); } .leftcol { position: static; } }
 .card { padding: 12px 14px; gap: 9px; }
 .card h2 { font-size: 16px; }
 canvas.chart { height: 104px; }
@@ -208,7 +214,7 @@ td.x button + button { margin-left: 4px; }
 table.ggrid td:first-child { white-space: nowrap; font-size: 14px; }
 td input.time { width: 4.4em; }
 .mazeinfo { font-size: 13px; color: var(--muted); }
-@media (max-width: 1320px) { .topbar h1 { font-size: 18px; } #diffLabel, .pblabel, label[for="chalSel"] { display: none; } .topbar { gap: 8px 10px; } .arena .controls button { padding: 7px 10px; } }
+@media (max-width: 1320px) { .topbar h1 { font-size: 18px; } #diffLabel, .pblabel { display: none; } .topbar { gap: 8px 10px; } .arena .controls button { padding: 7px 10px; } }
 .statrow { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .statrow .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .statrow .pill { width: auto; justify-self: start; }
@@ -220,27 +226,29 @@ td input.time { width: 4.4em; }
 <div class="wrap">
   <header class="topbar">
     <h1>Vehicles: A Sandbox for Control</h1>
-    <label class="hint" for="chalSel">Challenge</label>
-    <select id="chalSel" aria-label="Challenge"></select>
-    <span class="hint" id="chalCount"></span>
-    <span class="spacer"></span>
-    <div class="seg" id="worlds" role="group" aria-label="World"><button data-w="maze">Maze</button><button data-w="play">Playground</button></div>
-    <span class="hint" id="diffLabel">Maze</span>
-    <div class="seg" id="diff" role="group" aria-label="Maze difficulty"><button data-d="easy">Easy</button><button data-d="medium">Medium</button><button data-d="hard">Hard</button></div>
   </header>
 
   <div class="main">
-    <section class="card arena" aria-label="Arena">
+    <div class="leftcol">
+    <section class="card chal" aria-label="Challenge">
+      <div class="controls chalrow">
+        <select id="chalSel" aria-label="Challenge"></select><span class="hint" id="chalCount"></span><span class="spacer"></span>
+        <button id="hintBtn" hidden>Hint</button><button id="solBtn" hidden>Show solution</button></div>
       <div class="mission" id="mission" aria-live="polite"><span class="mt"><b id="misTitle"></b> <span id="misText"></span></span><span class="st" id="misStatus"></span></div>
       <p class="hintbox" id="hintBox" hidden></p>
+    </section>
+    <section class="card arena" aria-label="Arena">
+      <div class="controls">
+        <div class="seg" id="worlds" role="group" aria-label="World"><button data-w="maze">Maze</button><button data-w="play">Playground</button></div>
+        <span class="spacer"></span><span class="hint" id="diffLabel">Maze</span>
+        <div class="seg" id="diff" role="group" aria-label="Maze difficulty"><button data-d="easy">Easy</button><button data-d="medium">Medium</button><button data-d="hard">Hard</button></div>
+      </div>
       <canvas id="maze" role="img" aria-label="Arena with the robot, its sensor readings, and its paths"></canvas>
       <div class="legend" id="legend"></div>
       <div class="controls">
         <button class="primary" id="run">Run</button>
         <button id="reset" title="Put the robot back at the start">Reset</button>
         <button id="clear" title="Erase the faded paths of earlier runs">Clear paths</button>
-        <button id="hintBtn" hidden>Hint</button>
-        <button id="solBtn" hidden>Show solution</button>
         <span class="spacer"></span>
         <select id="speed" aria-label="Playback speed" title="Playback speed"><option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option><option value="16">16×</option></select>
       </div>
@@ -253,13 +261,16 @@ td input.time { width: 4.4em; }
       </div>
       <div class="controls" id="playRow" hidden>
         <label class="hint" for="layout">Layout</label>
-        <select id="layout"><option value="">Choose…</option><option value="one">One object</option><option value="two">Two objects</option><option value="four">Four objects</option><option value="corner">Object near a corner (wraps)</option><option value="goalBehind">Goal behind an object</option><option value="random">Random objects</option><option value="clear">No objects</option></select>
+        <select id="layout"><option value="">Choose…</option><option value="one">One object</option><option value="two">Two objects</option><option value="four">Four objects</option><option value="corner">Object near a corner (wraps)</option><option value="goalBehind">Goal behind an object</option><option value="hallway">Hallway (two long walls)</option><option value="wallGoal">Wall before the goal</option><option value="clutter">Clutter</option><option value="random">Random objects</option><option value="clear">No objects</option></select>
+        <span class="hint">Click adds</span>
+        <div class="seg" id="addKind" role="group" aria-label="Object added by a click"><button data-k="round">Round</button><button data-k="wall">Wall</button></div>
+        <select id="wallLen" aria-label="Wall length"><option value="0.5">0.5 m</option><option value="1" selected>1.0 m</option><option value="1.5">1.5 m</option></select>
         <label class="sw-inline"><input type="checkbox" id="goalOn"> Goal marker</label>
         <label class="sw-inline"><input type="checkbox" id="second"> Second vehicle</label>
         <select id="secondPreset" aria-label="Second vehicle behavior" hidden></select>
         <label class="sw-inline"><input type="checkbox" id="showCones" checked> Sensor cones</label>
       </div>
-      <p class="hint" id="playHelp" hidden>Click empty floor to add an object (up to 5). Drag objects, the goal, or a vehicle to move them; drag the small handle in front of a vehicle to aim it. Double-click an object to remove it.</p>
+      <p class="hint" id="playHelp" hidden>Click empty floor to add the chosen object (up to 12; walls are 0.25 m thick). Drag objects, walls, the goal or a vehicle to move them. Drag a wall’s end handle to rotate it in 15° steps, and the handle in front of a vehicle to aim it. Double-click an object or wall to remove it.</p>
       <div class="statrow"><span class="pill" id="pill" aria-live="polite">Ready: press Run</span>
       <div class="stats">
         <div class="stat"><small id="lDist">To goal</small><b id="sDist">–</b></div>
@@ -268,6 +279,7 @@ td input.time { width: 4.4em; }
         <div class="stat"><small id="lRuns">Goal runs</small><b id="sRuns">0 / 0</b></div>
       </div></div>
     </section>
+    </div>
 
     <div class="side">
       <section class="card" aria-label="Live readings">
@@ -682,11 +694,59 @@ const MR = (() => {
     }
     return S;
   }
+  // ----- long walls (rotated rectangles): geometry in the wall's own frame -----
+  const WALL_W = 0.25, WALL_RAYS = 13;
+  // the wrapped copies of a wall worth checking from (x, y): offsets of its center
+  function images(o, x, y) {
+    const dx = wrapD(o.x - x, PW), dy = wrapD(o.y - y, PH), out = [[dx, dy]];
+    const ax = dx - Math.sign(dx || 1) * PW, ay = dy - Math.sign(dy || 1) * PH;
+    out.push([ax, dy], [dx, ay], [ax, ay]);
+    return out;
+  }
+  // robot position in the wall frame, for a wall whose center is at offset (dx, dy) from the robot
+  const local = (o, dx, dy) => { const c = Math.cos(o.ang), sn = Math.sin(o.ang); return [-dx * c - dy * sn, dx * sn - dy * c, c, sn]; };
+  // distance from the robot center to the wall, and the closest point (relative to the robot)
+  function wallNear(o, x, y) {
+    let best = { d: Infinity };
+    images(o, x, y).forEach(([dx, dy]) => {
+      const [ux, uy, c, sn] = local(o, dx, dy), qx = Math.max(-o.hl, Math.min(o.hl, ux)), qy = Math.max(-o.hw, Math.min(o.hw, uy));
+      const d = Math.hypot(ux - qx, uy - qy);
+      if (d < best.d) best = { d, px: dx + qx * c - qy * sn, py: dy + qx * sn + qy * c };
+    });
+    return best;
+  }
+  // distance along a ray from the robot center to the wall (Infinity if it misses)
+  function wallRay(o, x, y, a) {
+    let best = Infinity;
+    images(o, x, y).forEach(([dx, dy]) => {
+      const [ux, uy, c, sn] = local(o, dx, dy), du = Math.cos(a) * c + Math.sin(a) * sn, dv = -Math.cos(a) * sn + Math.sin(a) * c;
+      let t0 = 0, t1 = Infinity;
+      for (const [p, d, h] of [[ux, du, o.hl], [uy, dv, o.hw]]) {
+        if (Math.abs(d) < 1e-12) { if (p < -h || p > h) { t0 = Infinity; break; } continue; }
+        let a1 = (-h - p) / d, a2 = (h - p) / d; if (a1 > a2) [a1, a2] = [a2, a1];
+        t0 = Math.max(t0, a1); t1 = Math.min(t1, a2);
+      }
+      if (t0 <= t1 && t0 < best) best = t0;
+    });
+    return best;
+  }
+  const fade = ad => { const w = Math.min(1, Math.max(0, (ad - 0.5 * CONE) / (0.5 * CONE))); return w * w * (3 - 2 * w); };
+  // playground objects from the stored list: round objects and walls
+  function makeObjs(items) {
+    let nr = 0, nw = 0;
+    return items.map(l => l.kind === 'wall'
+      ? { x: l.x, y: l.y, kind: 'wall', hl: (l.len || 1) / 2, hw: WALL_W / 2, ang: l.ang || 0, id: 'wall' + (nw++) }
+      : { x: l.x, y: l.y, r: LAMP_R, id: 'lamp' + (nr++) });
+  }
+  function layoutObjs(L) { return L.lamps.map((e, i) => e.length > 2 ? { x: e[0], y: e[1], kind: 'wall', len: e[2], ang: e[3] * Math.PI / 180, id: i } : { x: e[0], y: e[1], kind: 'round', id: i }); }
   function sensePlayObj(x, y, th, s, objs) {
     const ang = s.angle * Math.PI / 180, dirs = [th + ang, th, th - ang];
-    const rel = objs.map(o => { const dx = wrapD(o.x - x, PW), dy = wrapD(o.y - y, PH); return { d: Math.hypot(dx, dy), b: Math.atan2(dy, dx), r: o.r, id: o.id }; });
+    const walls = objs.filter(o => o.kind === 'wall');
+    const rel = objs.filter(o => o.kind !== 'wall').map(o => { const dx = wrapD(o.x - x, PW), dy = wrapD(o.y - y, PH); return { d: Math.hypot(dx, dy), b: Math.atan2(dy, dx), r: o.r, id: o.id }; });
     if (s.type === 'bump') {
-      const c = dirs.map(a => rel.some(o => o.d < RAD + o.r + BUMP_REACH && Math.abs(angDiff(o.b - a)) < 0.7));
+      const wn = walls.map(o => wallNear(o, x, y));
+      const c = dirs.map(a => rel.some(o => o.d < RAD + o.r + BUMP_REACH && Math.abs(angDiff(o.b - a)) < 0.7)
+        || wn.some(n => n.d < RAD + BUMP_REACH && Math.abs(angDiff(Math.atan2(n.py, n.px) - a)) < 0.7));
       return { L: c[0] ? 0 : PRANGE, F: c[1] ? 0 : PRANGE, R: c[2] ? 0 : PRANGE, contact: c, bump: true, seen: [null, null, null] };
     }
     const seen = [null, null, null];
@@ -698,6 +758,14 @@ const MR = (() => {
         const w = Math.min(1, Math.max(0, (ad - 0.5 * CONE) / (0.5 * CONE)));   // sensitivity fades over the outer half of the cone
         const eff = g + (PRANGE - g) * w * w * (3 - 2 * w);                       // smooth: reads farther near the edge
         if (eff < best) { best = eff; seen[i] = o.id; }
+      });
+      walls.forEach(o => {                // walls: a fan of rays across the cone, weaker toward its edges
+        for (let k = 0; k < WALL_RAYS; k++) {
+          const off = -CONE + 2 * CONE * k / (WALL_RAYS - 1), t = wallRay(o, x, y, a + off);
+          if (!(t < RAD + PRANGE)) continue;
+          const g = Math.max(0, t - RAD), eff = g + (PRANGE - g) * fade(Math.abs(off));
+          if (eff < best) { best = eff; seen[i] = o.id; }
+        }
       });
       if (s.noise && best < PRANGE) best = Math.max(0, Math.min(PRANGE, best + gauss() * (s.noiseAmt || 0.006) * (1 + 5 * best)));
       return best;
@@ -712,7 +780,7 @@ const MR = (() => {
   }
   function stepPlay(v, lamps, others, goal) {
     const cfg = v.cfg, o = cfg.problems || {};
-    const objs = lamps.map((l, i) => ({ x: l.x, y: l.y, r: LAMP_R, id: 'lamp' + i })).concat(others.map((w, j) => ({ x: w.x, y: w.y, r: RAD, id: 'veh' + j })));
+    const objs = makeObjs(lamps).concat(others.map((w, j) => ({ x: w.x, y: w.y, r: RAD, id: 'veh' + j })));
     v.S = sensePlay(v.x, v.y, v.th, cfg.sensor, objs, goal);
     let cl = 0, cr = 0;
     if (v.ctl) { const u = v.ctl.step(v.S, DT); cl = u.vl; cr = u.vr; v.info = u.info; }
@@ -730,12 +798,13 @@ const MR = (() => {
     const sp = (v.vl + v.vr) / 2, w = (v.vr - v.vl) / TRACK;
     const nx = wrapP(v.x + sp * Math.cos(v.th) * DT, PW), ny = wrapP(v.y + sp * Math.sin(v.th) * DT, PH);
     v.th += w * DT; v.t += DT;
-    const blocked = objs.some(ob => Math.hypot(wrapD(ob.x - nx, PW), wrapD(ob.y - ny, PH)) < RAD + ob.r);
-    objs.forEach(ob => { if (Math.hypot(wrapD(ob.x - nx, PW), wrapD(ob.y - ny, PH)) < RAD + ob.r + 0.01) v.touched.add(ob.id); });
+    const gapTo = ob => ob.kind === 'wall' ? wallNear(ob, nx, ny).d - RAD : Math.hypot(wrapD(ob.x - nx, PW), wrapD(ob.y - ny, PH)) - RAD - ob.r;
+    const gaps = objs.map(gapTo), blocked = gaps.some(g => g < 0);
+    objs.forEach((ob, k) => { if (gaps[k] < 0.01) v.touched.add(ob.id); });
     if (blocked) { if (!v.inContact) { v.hits++; v.th += (Math.random() * 2 - 1) * 3 * Math.PI / 180; } v.inContact = true; }
     else { v.x = nx; v.y = ny; v.inContact = false; }
     let nearNow = false;
-    lamps.forEach((l, i) => { if (Math.hypot(wrapD(l.x - v.x, PW), wrapD(l.y - v.y, PH)) - LAMP_R - RAD < 0.30) { nearNow = true; v.visited.add(l.id); } });
+    lamps.forEach((l, i) => { if (l.kind !== 'wall' && Math.hypot(wrapD(l.x - v.x, PW), wrapD(l.y - v.y, PH)) - LAMP_R - RAD < 0.30) { nearNow = true; v.visited.add(l.id); } });
     if (nearNow) v.near += DT;
     if (goal) {
       const gd = Math.hypot(wrapD(goal.x - v.x, PW), wrapD(goal.y - v.y, PH));
@@ -749,6 +818,9 @@ const MR = (() => {
     corner: { name: 'Object near a corner (wraps)', lamps: [[4.35, 2.8]], start: [1.0, 1.05, 2.8] },
     goalBehind: { name: 'Goal behind an object', lamps: [[2.15, 1.5]], start: [1.15, 1.5, 0], goal: [3.15, 1.5] },
     four: { name: 'Four objects', lamps: [[1.2, 0.8], [3.3, 0.8], [1.2, 2.2], [3.3, 2.2]], start: [2.25, 1.5, 0.4] },
+    hallway: { name: 'Hallway (two long walls)', lamps: [[2.4, 1.85, 1.5, 0], [2.4, 1.15, 1.5, 0]], start: [0.8, 1.5, 0] },
+    wallGoal: { name: 'Wall before the goal', lamps: [[2.25, 1.5, 1.0, 90]], start: [1.1, 1.5, 0], goal: [3.35, 1.5] },
+    clutter: { name: 'Clutter', lamps: [[1.0, 0.7], [2.0, 2.4], [3.6, 0.6], [3.9, 2.3], [1.5, 1.6, 1.0, 30], [3.0, 1.2, 1.0, 90], [2.6, 0.45, 0.5, 0], [0.6, 2.4, 0.5, 90], [3.6, 1.6]], start: [0.4, 1.2, 0] },
   };
   const prow = (sp, gL, gR) => ({ sp, gL, gR });
   const G0 = () => ({ GL: prow(1.5, 0, 0), GF: prow(1.5, 0, 0), GR: prow(1.5, 0, 0) });
@@ -760,7 +832,7 @@ const MR = (() => {
     explorer:   { name: 'Explorer (crossed, −)',   base: 0.22, rows: withGoal({ L: prow(1.5, 0, -0.10), F: prow(1.5, -0.06, -0.06), R: prow(1.5, -0.10, 0) }) },
   };
 
-  return { GSENS, GOAL_R, gridKeys, PW, PH, PRANGE, LAMP_R, CONE, wrapD, wrapP, sensePlay, makeVehicle, stepPlay, PLAY_LAYOUTS, PLAY_GRID_PRESETS, SENS, signals, gridWheels, fires, REACT_PRESETS, GRID_PRESETS, HYBRID_PRESETS, sideTarget, openAt, passDist, CELL, COLS, ROWS, MW, MH, WALL_T, TRACK, RAD, RANGE, VMAX, DT, CLASSIC, makeMaze, randomMaze, rngOf, cellOf, hitsWall, ray, center, wallAt, sense, simulate };
+  return { WALL_W, makeObjs, layoutObjs, wallNear, GSENS, GOAL_R, gridKeys, PW, PH, PRANGE, LAMP_R, CONE, wrapD, wrapP, sensePlay, makeVehicle, stepPlay, PLAY_LAYOUTS, PLAY_GRID_PRESETS, SENS, signals, gridWheels, fires, REACT_PRESETS, GRID_PRESETS, HYBRID_PRESETS, sideTarget, openAt, passDist, CELL, COLS, ROWS, MW, MH, WALL_T, TRACK, RAD, RANGE, VMAX, DT, CLASSIC, makeMaze, randomMaze, rngOf, cellOf, hitsWall, ray, center, wallAt, sense, simulate };
 })();
 
 
@@ -834,10 +906,11 @@ const CH = ((MR) => {
   function playAcc() { return { t: 0, dist: 0, hits: 0, stillT: 0, stoppedGap: null, atGoalRun: 0, atGoalMax: 0, touched: new Set(), lamps: 0, x: null, y: null }; }
   function playStep(a, v, lamps, goal) {
     if (a.x != null) { const d = Math.hypot(wrapD(v.x - a.x, PW), wrapD(v.y - a.y, PH)); a.dist += d; a.stillT = d / DT < 0.01 ? a.stillT + DT : 0; }
-    a.x = v.x; a.y = v.y; a.t = v.t; a.hits = v.hits; a.lamps = lamps.length;
+    const rounds = lamps.filter(l => l.kind !== 'wall');   // walls do not count as objects to touch or park beside
+    a.x = v.x; a.y = v.y; a.t = v.t; a.hits = v.hits; a.lamps = rounds.length;
     v.touched.forEach(id => { if (String(id).startsWith('lamp')) a.touched.add(id); });
-    if (a.stillT >= 3 && lamps.length) {
-      const gap = Math.min(...lamps.map(l => Math.hypot(wrapD(l.x - v.x, PW), wrapD(l.y - v.y, PH)) - LAMP_R - RAD));
+    if (a.stillT >= 3 && rounds.length) {
+      const gap = Math.min(...rounds.map(l => Math.hypot(wrapD(l.x - v.x, PW), wrapD(l.y - v.y, PH)) - LAMP_R - RAD));
       a.stoppedGap = a.stoppedGap == null ? gap : Math.min(a.stoppedGap, gap);
     }
     if (goal) {
@@ -929,6 +1002,13 @@ const CH = ((MR) => {
       setup: { layout: 'goalBehind', goal: true, sensor: { type: 'proximity', angle: 30 }, asym: true },
       hints: ['Use two behaviors at once: fear of objects (object rows) and love of the goal (goal rows).', 'Goal rows with negative same-side gains steer toward the goal and slow down near it.'],
       solution: { mode: 'brait', grid: Object.assign(grid(true, 0.22, { L: row(1.5, 0.15, 0), F: row(1.5, 0.10, -0.05), R: row(1.5, 0, 0.15), GL: row(1.5, -0.10, 0), GF: row(1.5, -0.15, -0.15), GR: row(1.5, 0, -0.10) }), { sym: false }) },
+      check: (a) => ({ pass: a.atGoalMax >= 5 && a.hits === 0, text: `At goal ${s1(Math.min(5, a.atGoalRun))} / 5 s · ${hitsTxt(a)}` }) },
+    { id: 'wall', title: 'Around the wall', world: 'play', mode: 'hybrid',
+      mission: 'A 1 m wall stands between the robot and the gold goal. Reach the goal and stay there for 5 s, with no hits.',
+      setup: { layout: 'wallGoal', goal: true, sensor: { type: 'proximity', angle: 30 } },
+      hints: ['Steering away is not enough: the wall is wider than the robot can see around, and the goal keeps pulling it straight back.', 'Keep a gain grid that loves the goal, then add a front trigger: when the wall is close, turn 90° and drive along it for a few seconds before the grid takes over again.'],
+      solution: { mode: 'hybrid', grid: grid(true, 0.22, { L: row(1.5, 0.15, 0), F: row(1.5, 0, 0), R: row(1.5, 0, 0.15), GL: row(1.5, -0.10, 0), GF: row(1.5, -0.15, -0.15), GR: row(1.5, 0, -0.10) }),
+        react: { default: [0, 0], interrupt: false, triggers: [T('F', true, 'lt', 0.2, [[0.125, -0.125, 1.26], [0.15, 0.15, 4]]), T('L', false, 'lt', 0.3, [[0, 0, 0.5]]), T('R', false, 'lt', 0.3, [[0, 0, 0.5]])] } },
       check: (a) => ({ pass: a.atGoalMax >= 5 && a.hits === 0, text: `At goal ${s1(Math.min(5, a.atGoalRun))} / 5 s · ${hitsTxt(a)}` }) },
   ];
   LIST.forEach((c, i) => { c.n = i + 1; });
@@ -1650,7 +1730,7 @@ const CH = ((MR) => {
     return out;
   }
   function objsFor(i, ps) {
-    return lampList().map((l, k) => ({ x: l.x, y: l.y, r: MR.LAMP_R, id: 'lamp' + k })).concat(ps.filter(p => p.i !== i).map(p => ({ x: p.x, y: p.y, r: RAD, id: 'veh' + p.i })));
+    return MR.makeObjs(lampList()).concat(ps.filter(p => p.i !== i).map(p => ({ x: p.x, y: p.y, r: RAD, id: 'veh' + p.i })));
   }
   function resetPlay(silent) {
     playing = false; pv = null; ptrail = []; pt = 0; phist = []; pacc = null;
@@ -1682,7 +1762,7 @@ const CH = ((MR) => {
     const GO = !!goalObj();
     $('sDist').textContent = (v ? (GO ? v.atGoal : v.near) : 0).toFixed(1) + ' s';
     $('sHits').textContent = String(v ? v.hits : 0);
-    $('sRuns').textContent = GO ? (v && v.firstGoal != null ? v.firstGoal.toFixed(1) + ' s' : '–') : (v ? v.visited.size : 0) + ' / ' + lampList().length;
+    $('sRuns').textContent = GO ? (v && v.firstGoal != null ? v.firstGoal.toFixed(1) + ' s' : '–') : (v ? v.visited.size : 0) + ' / ' + lampList().filter(l => l.kind !== 'wall').length;
     if (!v) { pill.className = 'pill'; pill.textContent = 'Ready: press Play'; return; }
     if (!playing) { pill.className = 'pill'; pill.textContent = 'Paused'; return; }
     pill.className = 'pill warn';
@@ -1698,6 +1778,13 @@ const CH = ((MR) => {
     const ys = [0]; if (y - r < 0) ys.push(MR.PH); if (y + r > MR.PH) ys.push(-MR.PH);
     xs.forEach(dx => ys.forEach(dy => { if (dx || dy) out.push([x + dx, y + dy]); }));
     return out;
+  }
+  const wallEnd = l => ({ x: l.x + Math.cos(l.ang || 0) * (l.len || 1) / 2, y: l.y + Math.sin(l.ang || 0) * (l.len || 1) / 2 });
+  function wallAt(l, x, y) {                    // a long wall: a rotated rectangle
+    ctx.save(); ctx.translate(X(x), Y(y)); ctx.rotate(-(l.ang || 0));
+    const hl = (l.len || 1) / 2 * S, hw = MR.WALL_W / 2 * S;
+    ctx.fillStyle = css('--wall'); ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.rect(-hl, -hw, 2 * hl, 2 * hw); ctx.fill(); ctx.stroke(); ctx.restore();
   }
   function lampAt(x, y) {                      // a plain round object
     ctx.fillStyle = css('--wall'); ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1.5;
@@ -1750,7 +1837,9 @@ const CH = ((MR) => {
     ctx.save(); ctx.beginPath(); ctx.rect(ax, ay, aw, ah); ctx.clip();
     const ps = poses();
     if (goalObj()) copiesOf(st.play.goal.x, st.play.goal.y, MR.GOAL_R + 0.01).forEach(([x, y]) => goalAt(x, y));
-    lampList().forEach(l => copiesOf(l.x, l.y, MR.LAMP_R + 0.01).forEach(([x, y]) => lampAt(x, y)));
+    lampList().forEach(l => l.kind === 'wall' ? copiesOf(l.x, l.y, (l.len || 1) / 2 + 0.15).forEach(([x, y]) => wallAt(l, x, y)) : copiesOf(l.x, l.y, MR.LAMP_R + 0.01).forEach(([x, y]) => lampAt(x, y)));
+    if (!playing) lampList().forEach(l => { if (l.kind !== 'wall') return; const h = wallEnd(l);   // rotate handle at one end
+      ctx.fillStyle = css('--panel'); ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(X(h.x), Y(h.y), 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); });
     ptrail.forEach((tr, i) => {
       const col = i ? css('--planned') : css('--actual');
       ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
@@ -1802,7 +1891,8 @@ const CH = ((MR) => {
     if (!playing) for (const q of ps) { const h = handlePos(q); if (Math.hypot(h.x - p.x, h.y - p.y) < 0.07) { dragging = { kind: 'aim', i: q.i }; break; } }
     if (!dragging) for (const q of ps) if (Math.hypot(q.x - p.x, q.y - p.y) < 0.11) { dragging = { kind: 'veh', i: q.i }; break; }
     if (!dragging && goalObj() && Math.hypot(st.play.goal.x - p.x, st.play.goal.y - p.y) < 0.12) dragging = { kind: 'goal' };
-    if (!dragging) for (const l of lampList()) if (Math.hypot(l.x - p.x, l.y - p.y) < 0.11) { dragging = { kind: 'lamp', lamp: l }; break; }
+    if (!dragging && !playing) for (const l of lampList()) if (l.kind === 'wall') { const h = wallEnd(l); if (Math.hypot(h.x - p.x, h.y - p.y) < 0.07) { dragging = { kind: 'rot', lamp: l }; break; } }
+    if (!dragging) for (const l of lampList()) if (hitObj(l, p)) { dragging = { kind: 'lamp', lamp: l, ox: l.x - p.x, oy: l.y - p.y }; break; }
     if (!dragging) dragging = { kind: 'new', x: p.x, y: p.y, moved: false };
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
   });
@@ -1811,43 +1901,50 @@ const CH = ((MR) => {
     const p = clampA(toWorld(e));
     if (dragging.kind === 'aim') { const q = poses().find(q => q.i === dragging.i); setPose(dragging.i, { th: Math.atan2(p.y - q.y, p.x - q.x) }); }
     else if (dragging.kind === 'veh') setPose(dragging.i, { x: p.x, y: p.y });
-    else if (dragging.kind === 'lamp') { dragging.lamp.x = p.x; dragging.lamp.y = p.y; }
+    else if (dragging.kind === 'lamp') { dragging.lamp.x = MR.wrapP(p.x + (dragging.ox || 0), MR.PW); dragging.lamp.y = MR.wrapP(p.y + (dragging.oy || 0), MR.PH); }
+    else if (dragging.kind === 'rot') { const l = dragging.lamp, a = Math.atan2(p.y - l.y, p.x - l.x), q = Math.PI / 12; l.ang = Math.round(a / q) * q; }
     else if (dragging.kind === 'goal') { st.play.goal.x = p.x; st.play.goal.y = p.y; }
     else if (Math.hypot(p.x - dragging.x, p.y - dragging.y) > 0.03) dragging.moved = true;
     if (!playing) draw();
   });
   cv.addEventListener('pointerup', () => {
     if (!dragging || !isPlay()) return;
-    if (dragging.kind === 'new' && !dragging.moved && lampList().length < 5) {
+    if (dragging.kind === 'new' && !dragging.moved && lampList().length < MAXOBJ) {
       const id = Math.max(-1, ...lampList().map(l => l.id)) + 1;
-      lampList().push({ x: dragging.x, y: dragging.y, id });
+      lampList().push(st.play.addKind === 'wall' ? { x: dragging.x, y: dragging.y, id, kind: 'wall', len: st.play.wallLen || 1, ang: 0 } : { x: dragging.x, y: dragging.y, id, kind: 'round' });
     }
     dragging = null; save(); setStatus(); if (!playing) draw();
   });
   cv.addEventListener('dblclick', e => {
     if (!isPlay()) return;
-    const p = toWorld(e), L = lampList(), k = L.findIndex(l => Math.hypot(l.x - p.x, l.y - p.y) < 0.11);
+    const p = toWorld(e), L = lampList(), k = L.findIndex(l => hitObj(l, p));
     if (k >= 0) { L.splice(k, 1); save(); setStatus(); if (!playing) draw(); }
   });
+  const MAXOBJ = 12;
+  const hitObj = (l, p) => l.kind === 'wall' ? MR.wallNear(MR.makeObjs([l])[0], p.x, p.y).d < 0.04 : Math.hypot(MR.wrapD(l.x - p.x, MR.PW), MR.wrapD(l.y - p.y, MR.PH)) < 0.11;
   function applyLayout(key) {
     if (key === 'clear') st.play.lamps = [];
     else if (key === 'random') {
-      const lamps = [], n = 2 + Math.floor(Math.random() * 3);
-      for (let tries = 0; lamps.length < n && tries < 500; tries++) {
-        const x = 0.3 + Math.random() * (MR.PW - 0.6), y = 0.3 + Math.random() * (MR.PH - 0.6);
-        if (Math.hypot(x - st.play.start.x, y - st.play.start.y) < 0.6) continue;
-        if (lamps.some(l => Math.hypot(l.x - x, l.y - y) < 0.7)) continue;
-        lamps.push({ x, y, id: lamps.length });
+      const lamps = [], n = 4 + Math.floor(Math.random() * 5), nw = Math.floor(Math.random() * 3);
+      for (let tries = 0; lamps.length < n && tries < 800; tries++) {
+        const x = 0.3 + Math.random() * (MR.PW - 0.6), y = 0.3 + Math.random() * (MR.PH - 0.6), wall = lamps.length < nw;
+        if (Math.hypot(x - st.play.start.x, y - st.play.start.y) < (wall ? 1.0 : 0.6)) continue;
+        if (lamps.some(l => Math.hypot(l.x - x, l.y - y) < (wall || l.kind === 'wall' ? 1.0 : 0.6))) continue;
+        lamps.push(wall ? { x, y, id: lamps.length, kind: 'wall', len: [0.5, 1.0][Math.floor(Math.random() * 2)], ang: Math.floor(Math.random() * 12) * Math.PI / 12 } : { x, y, id: lamps.length, kind: 'round' });
       }
       st.play.lamps = lamps;
     } else {
       const L = MR.PLAY_LAYOUTS[key];
-      st.play.lamps = L.lamps.map(([x, y], i) => ({ x, y, id: i }));
+      st.play.lamps = MR.layoutObjs(L);
       st.play.start = { x: L.start[0], y: L.start[1], th: L.start[2] };
       if (L.goal) st.play.goal = { on: true, x: L.goal[0], y: L.goal[1] };
     }
     resetPlay(); save(); renderGrid(); syncUI(); setStatus(); draw();
   }
+  const syncAdd = () => { document.querySelectorAll('#addKind button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === (st.play.addKind || 'round'))); $('wallLen').hidden = st.play.addKind !== 'wall'; $('wallLen').value = String(st.play.wallLen || 1); };
+  document.querySelectorAll('#addKind button').forEach(b => b.addEventListener('click', () => { st.play.addKind = b.dataset.k; syncAdd(); save(); }));
+  $('wallLen').addEventListener('change', e => { st.play.wallLen = parseFloat(e.target.value); save(); });
+  syncAdd();
   $('layout').addEventListener('change', e => { const k = e.target.value; if (!k) return; e.target.value = ''; applyLayout(k); });
   $('secondPreset').innerHTML = Object.entries(MR.PLAY_GRID_PRESETS).map(([k, p]) => `<option value="${k}">${esc(p.name)}</option>`).join('');
   $('secondPreset').value = st.play.second.preset;
@@ -2015,7 +2112,7 @@ ${triggerChain(R, gridBody(G, '    '))}  delay(10);
     st.react = CH.blankReact(play);
     if (play) {
       const L = MR.PLAY_LAYOUTS[S.layout];
-      st.play.lamps = L.lamps.map(([x, y], i) => ({ x, y, id: i }));
+      st.play.lamps = MR.layoutObjs(L);
       st.play.start = { x: L.start[0], y: L.start[1], th: L.start[2] };
       st.play.goal = { on: !!S.goal, x: L.goal ? L.goal[0] : st.play.goal.x, y: L.goal ? L.goal[1] : st.play.goal.y };
       st.play.second.on = false;
@@ -2052,7 +2149,7 @@ ${triggerChain(R, gridBody(G, '    '))}  delay(10);
   function renderChalSel() {
     const sel = $('chalSel'), mark = id => st.done[id] === 'pass' ? ' ✓' : st.done[id] === 'sol' ? ' (with solution)' : '';
     const grp = (w, label) => `<optgroup label="${label}">${CH.LIST.filter(c => c.world === w).map(c => `<option value="${c.id}">${c.n}. ${esc(c.title)}${mark(c.id)}</option>`).join('')}</optgroup>`;
-    sel.innerHTML = `<option value="">Free play</option>` + grp('maze', 'Maze') + grp('play', 'Playground');
+    sel.innerHTML = `<option value="">Challenge: none (free play)</option>` + grp('maze', 'Maze') + grp('play', 'Playground');
     sel.value = st.challenge || '';
     const n = CH.LIST.filter(c => st.done[c.id] === 'pass').length;
     $('chalCount').textContent = `${n} of ${CH.LIST.length} done`;
@@ -2064,7 +2161,7 @@ ${triggerChain(R, gridBody(G, '    '))}  delay(10);
   }
   function updateChallenge(final) {
     const ch = CH.byId[st.challenge], box = $('mission');
-    $('hintBtn').hidden = $('solBtn').hidden = !ch;
+    $('hintBtn').hidden = $('solBtn').hidden = !ch; box.hidden = !ch;
     if (!ch) {
       $('misTitle').textContent = 'Free play:'; $('misText').textContent = 'build any controller you like. Pick a challenge at the top to get a mission.';
       $('misStatus').textContent = ''; box.classList.remove('pass'); return;
